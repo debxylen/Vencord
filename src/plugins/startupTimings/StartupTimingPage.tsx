@@ -21,6 +21,8 @@ import { Flex } from "@components/Flex";
 import { findByPropsLazy } from "@webpack";
 import { Forms, React } from "@webpack/common";
 
+import { getStartupProfile } from "../../debug/startupProfiler";
+
 interface AppStartPerformance {
     prefix: string;
     logs: Log[];
@@ -110,6 +112,57 @@ function TimingSection({ title, logs, traceEnd }: TimingSectionProps) {
     );
 }
 
+function VencordPhaseSection() {
+    const profile = getStartupProfile();
+
+    return (
+        <section>
+            <Forms.FormTitle tag="h2">Vencord Startup Phases</Forms.FormTitle>
+            <code>
+                <div style={{ color: "var(--text-strong)", display: "grid", gridTemplateColumns: "auto auto 1fr", gap: "2px 10px", userSelect: "text" }}>
+                    <span>Start</span>
+                    <span>Duration</span>
+                    <span style={{ marginBottom: 5 }}>Phase</span>
+                    {profile.phases.map((phase, i) => (
+                        <React.Fragment key={i}>
+                            <span>{((phase.startedAt - profile.bootAt) / 1000).toFixed(3)}s</span>
+                            <span>{phase.duration.toFixed(1)}ms</span>
+                            <span>{phase.name}</span>
+                        </React.Fragment>
+                    ))}
+                </div>
+            </code>
+        </section>
+    );
+}
+
+function SlowPluginsSection() {
+    const profile = getStartupProfile();
+    const slowPlugins = profile.plugins.slice(0, 25);
+
+    return (
+        <section>
+            <Forms.FormTitle tag="h2">Slowest Plugin Starts</Forms.FormTitle>
+            <code>
+                <div style={{ color: "var(--text-strong)", display: "grid", gridTemplateColumns: "auto auto auto 1fr", gap: "2px 10px", userSelect: "text" }}>
+                    <span>Start</span>
+                    <span>Duration</span>
+                    <span>Stage</span>
+                    <span style={{ marginBottom: 5 }}>Plugin</span>
+                    {slowPlugins.map((plugin, i) => (
+                        <React.Fragment key={i}>
+                            <span>{((plugin.startedAt - profile.bootAt) / 1000).toFixed(3)}s</span>
+                            <span>{plugin.duration.toFixed(1)}ms</span>
+                            <span>{plugin.stage}</span>
+                            <span>{plugin.name}</span>
+                        </React.Fragment>
+                    ))}
+                </div>
+            </code>
+        </section>
+    );
+}
+
 interface ServerTraceProps {
     trace: string;
 }
@@ -143,7 +196,10 @@ function StartupTimingPage() {
                 logs={AppStartPerformance.logs}
                 traceEnd={AppStartPerformance.endTime_}
             />
-            {/* Lazy Divider */}
+            <div style={{ marginTop: 5 }}>&nbsp;</div>
+            <VencordPhaseSection />
+            <div style={{ marginTop: 5 }}>&nbsp;</div>
+            <SlowPluginsSection />
             <div style={{ marginTop: 5 }}>&nbsp;</div>
             {serverTrace && <ServerTrace trace={serverTrace} />}
         </React.Fragment>

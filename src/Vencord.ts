@@ -42,6 +42,7 @@ import { initPluginManager, PMLogger, startAllPlugins } from "./api/PluginManage
 import { PlainSettings, Settings, SettingsStore } from "./api/Settings";
 import { getCloudSettings, putCloudSettings, shouldCloudSync } from "./api/SettingsSync/cloudSync";
 import { loadRuntimeUserPlugins } from "./api/UserPluginLoader";
+import { profileStartupPhase, profileStartupPhaseAsync } from "./debug/startupProfiler";
 import { localStorage } from "./utils/localStorage";
 import { relaunch } from "./utils/native";
 import { checkForUpdates, update, UpdateLogger } from "./utils/updater";
@@ -151,12 +152,12 @@ async function runUpdateCheck() {
 
 async function init() {
     await onceReady;
-    startAllPlugins(StartAt.WebpackReady);
+    profileStartupPhase("startAllPlugins(WebpackReady)", () => startAllPlugins(StartAt.WebpackReady));
 
-    syncSettings();
+    profileStartupPhaseAsync("syncSettings", syncSettings);
 
     if (!IS_WEB && !IS_UPDATER_DISABLED) {
-        runUpdateCheck();
+        profileStartupPhaseAsync("runUpdateCheck", runUpdateCheck);
 
         // this tends to get really annoying, so only do this if the user has auto-update without notification enabled
         if (Settings.autoUpdate && !Settings.autoUpdateNotification) {
@@ -178,14 +179,14 @@ async function init() {
     }
 }
 
-loadRuntimeUserPlugins();
-initPluginManager();
-initStyles();
-startAllPlugins(StartAt.Init);
+profileStartupPhase("loadRuntimeUserPlugins", loadRuntimeUserPlugins);
+profileStartupPhase("initPluginManager", initPluginManager);
+profileStartupPhase("initStyles", initStyles);
+profileStartupPhase("startAllPlugins(Init)", () => startAllPlugins(StartAt.Init));
 init();
 
 document.addEventListener("DOMContentLoaded", () => {
-    startAllPlugins(StartAt.DOMContentLoaded);
+    profileStartupPhase("startAllPlugins(DOMContentLoaded)", () => startAllPlugins(StartAt.DOMContentLoaded));
 
     // FIXME
     if (IS_DISCORD_DESKTOP && Settings.winNativeTitleBar && IS_WINDOWS) {

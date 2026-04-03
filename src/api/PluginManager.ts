@@ -37,6 +37,8 @@ import { FluxDispatcher } from "@webpack/common";
 import { patches } from "@webpack/patcher";
 
 import Plugins from "~plugins";
+
+import { recordPluginStartup } from "../debug/startupProfiler";
 export { Plugins as plugins };
 const logger = new Logger("PluginManager", "#a6d189");
 
@@ -181,6 +183,7 @@ export function subscribeAllPluginsFluxEvents(fluxDispatcher: typeof FluxDispatc
 }
 
 export const startPlugin = traceFunction("startPlugin", function startPlugin(p: Plugin) {
+    const pluginStartAt = performance.now();
     const {
         name, commands, contextMenus, managedStyle, userProfileBadge,
         onBeforeMessageEdit, onBeforeMessageSend, onMessageClick,
@@ -240,6 +243,7 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
     if (renderMessageAccessory) addMessageAccessory(name, renderMessageAccessory);
     if (messagePopoverButton) addMessagePopoverButton(name, messagePopoverButton.render, messagePopoverButton.icon);
 
+    recordPluginStartup(name, p.startAt ?? StartAt.WebpackReady, pluginStartAt, performance.now());
     return true;
 }, p => `startPlugin ${p.name}`);
 
