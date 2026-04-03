@@ -35,6 +35,7 @@ export const enum IpcEvents {
     OPEN_EXTERNAL = "VencordOpenExternal",
     OPEN_THEMES_FOLDER = "VencordOpenThemesFolder",
     OPEN_SETTINGS_FOLDER = "VencordOpenSettingsFolder",
+    OPEN_USERPLUGINS_FOLDER = "VencordOpenUserpluginsFolder",
 
     GET_UPDATES = "VencordGetUpdates",
     GET_REPO = "VencordGetRepo",
@@ -45,6 +46,8 @@ export const enum IpcEvents {
     GET_MONACO_THEME = "VencordGetMonacoTheme",
 
     GET_PLUGIN_IPC_METHOD_MAP = "VencordGetPluginIpcMethodMap",
+    GET_USER_PLUGINS = "VencordGetUserPlugins",
+    USER_PLUGINS_UPDATE = "VencordUserPluginsUpdate",
 
     CSP_IS_DOMAIN_ALLOWED = "VencordCspIsDomainAllowed",
     CSP_REMOVE_OVERRIDE = "VencordCspRemoveOverride",

@@ -20,11 +20,13 @@ import "./styles.css";
 
 import * as DataStore from "@api/DataStore";
 import { isPluginEnabled } from "@api/PluginManager";
-import { useSettings } from "@api/Settings";
+import { Settings, useSettings } from "@api/Settings";
 import { Card } from "@components/Card";
 import { Divider } from "@components/Divider";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Flex } from "@components/Flex";
 import { HeadingTertiary } from "@components/Heading";
+import { FolderIcon } from "@components/Icons";
 import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { ChangeList } from "@utils/ChangeList";
@@ -33,6 +35,7 @@ import { isTruthy } from "@utils/guards";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
+import { ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { useAwaiter, useCleanupEffect } from "@utils/react";
 import { Alerts, Button, lodash, Parser, React, Select, TextInput, Tooltip, useMemo, useState } from "@webpack/common";
 import { JSX } from "react";
@@ -44,6 +47,44 @@ import { UIElementsButton } from "./UIElements";
 
 export const cl = classNameFactory("vc-plugins-");
 export const logger = new Logger("PluginSettings", "#a6d189");
+
+function openUserPluginWarningModal() {
+    openModal(modalProps => (
+        <ModalRoot {...modalProps} size={ModalSize.SMALL}>
+            <ModalHeader>
+                <HeadingTertiary>Local Plugins</HeadingTertiary>
+            </ModalHeader>
+            <ModalContent>
+                <Paragraph>External plugins are not reviewed or tested by Vencord and may break or cause issues.</Paragraph>
+                <Paragraph>Vencord does not provide support for problems caused by them.</Paragraph>
+                <Paragraph>Only use plugins you trust.</Paragraph>
+            </ModalContent>
+            <ModalFooter justify="end">
+                <Button
+                    color={Button.Colors.TRANSPARENT}
+                    onClick={modalProps.onClose}
+                    style={{ marginRight: "0.5rem" }}
+                >
+                    Go Back
+                </Button>
+                <Button
+                    onClick={() => {
+                        Settings.userPluginWarningDismissed = true;
+                        modalProps.onClose();
+                        VencordNative.userPlugins.openFolder();
+                    }}
+                >
+                    I Understand
+                </Button>
+            </ModalFooter>
+        </ModalRoot>
+    ));
+}
+
+function openUserPluginsFolder() {
+    if (Settings.userPluginWarningDismissed) VencordNative.userPlugins.openFolder();
+    else openUserPluginWarningModal();
+}
 
 function ReloadRequiredCard({ required }: { required: boolean; }) {
     return (
@@ -61,11 +102,23 @@ function ReloadRequiredCard({ required }: { required: boolean; }) {
                     </>
                 )
                 : (
-                    <>
-                        <HeadingTertiary>Plugin Management</HeadingTertiary>
-                        <Paragraph>Press the cog wheel or info icon to get more info on a plugin</Paragraph>
-                        <Paragraph>Plugins with a cog wheel have settings you can modify!</Paragraph>
-                    </>
+                    <Flex style={{ justifyContent: "space-between", alignItems: "center", height: "100%" }}>
+                        <div>
+                            <HeadingTertiary>Plugin Management</HeadingTertiary>
+                            <Paragraph>Press the cog wheel or info icon to get more info on a plugin</Paragraph>
+                            <Paragraph>Plugins with a cog wheel have settings you can modify!</Paragraph>
+                        </div>
+                        {IS_DISCORD_DESKTOP && (
+                            <Button
+                                onClick={openUserPluginsFolder}
+                                className={cl("pill")}
+                                style={{ display: "flex", alignItems: "center", gap: "0.5em", flexShrink: 0 }}
+                            >
+                                <FolderIcon />
+                                Local Plugins
+                            </Button>
+                        )}
+                    </Flex>
                 )}
         </Card>
     );
@@ -116,6 +169,15 @@ function ExcludedPluginsList({ search }: { search: string; }) {
 function PluginSettings() {
     const settings = useSettings();
     const changes = useMemo(() => new ChangeList<string>(), []);
+    const [userPluginsDirty, setUserPluginsDirty] = useState(false);
+
+    React.useEffect(() => {
+        if (IS_WEB) return;
+
+        VencordNative.userPlugins.addChangeListener(() => {
+            setUserPluginsDirty(true);
+        });
+    }, []);
 
     useCleanupEffect(() => {
         if (changes.hasChanges)
@@ -259,7 +321,7 @@ function PluginSettings() {
 
     return (
         <SettingsTab>
-            <ReloadRequiredCard required={changes.hasChanges} />
+            <ReloadRequiredCard required={changes.hasChanges || userPluginsDirty} />
 
             <UIElementsButton />
 

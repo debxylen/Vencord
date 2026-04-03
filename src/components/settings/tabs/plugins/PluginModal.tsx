@@ -150,7 +150,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
         );
     }
 
-    const pluginMeta = PluginMeta[plugin.name];
+    const pluginMeta = PluginMeta[plugin.name] ?? { userPlugin: true };
 
     return (
         <ModalRoot transitionState={transitionState} size={ModalSize.MEDIUM}>
