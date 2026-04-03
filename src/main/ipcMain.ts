@@ -24,18 +24,19 @@ import { debounce } from "@shared/debounce";
 import { IpcEvents } from "@shared/IpcEvents";
 import { BrowserWindow, ipcMain, nativeTheme, shell, systemPreferences } from "electron";
 import monacoHtml from "file://monacoWin.html?minify&base64";
-import { FSWatcher, mkdirSync, readFileSync, watch, writeFileSync } from "fs";
+import { Dirent, existsSync, FSWatcher, mkdirSync, readdirSync, readFileSync, statSync, watch, writeFileSync } from "fs";
 import { open, readdir, readFile } from "fs/promises";
 import { join, normalize } from "path";
 
 import { registerCspIpcHandlers } from "./csp/manager";
 import { getThemeInfo, stripBOM, UserThemeHeader } from "./themes";
-import { ALLOWED_PROTOCOLS, QUICK_CSS_PATH, SETTINGS_DIR, THEMES_DIR } from "./utils/constants";
+import { ALLOWED_PROTOCOLS, QUICK_CSS_PATH, SETTINGS_DIR, THEMES_DIR, USERPLUGINS_DIR } from "./utils/constants";
 import { makeLinksOpenExternally } from "./utils/externalLinks";
 
 const RENDERER_CSS_PATH = join(__dirname, IS_VESKTOP ? "vencordDesktopRenderer.css" : "renderer.css");
 
 mkdirSync(THEMES_DIR, { recursive: true });
+mkdirSync(USERPLUGINS_DIR, { recursive: true });
 
 registerCspIpcHandlers();
 
@@ -74,6 +75,59 @@ function getThemeData(fileName: string) {
     return readFile(safePath, "utf-8");
 }
 
+function getUserPluginEntries() {
+    if (!existsSync(USERPLUGINS_DIR)) return [];
+
+    const files = [] as Array<{
+        fileName: string;
+        source: string;
+        siblingFiles: Array<{ path: string; content: string; }>;
+    }>;
+
+    const readSiblingFiles = (basePath: string, relativeBase = ""): Array<{ path: string; content: string; }> => {
+        const siblingFiles = [] as Array<{ path: string; content: string; }>;
+
+        for (const entry of readdirSync(basePath, { withFileTypes: true }) as Dirent[]) {
+            if (entry.name.startsWith("_") || entry.name.startsWith(".")) continue;
+
+            const fullPath = join(basePath, entry.name);
+            const relativePath = relativeBase ? `${relativeBase}/${entry.name}` : entry.name;
+
+            if (entry.isDirectory()) {
+                siblingFiles.push(...readSiblingFiles(fullPath, relativePath));
+                continue;
+            }
+
+            siblingFiles.push({
+                path: relativePath.replaceAll("\\", "/"),
+                content: readFileSync(fullPath).toString("base64")
+            });
+        }
+
+        return siblingFiles;
+    };
+
+    for (const entry of readdirSync(USERPLUGINS_DIR, { withFileTypes: true }) as Dirent[]) {
+        if (entry.name.startsWith("_") || entry.name.startsWith(".")) continue;
+
+        const fullPath = join(USERPLUGINS_DIR, entry.name);
+
+        if (entry.isFile() && entry.name.endsWith(".js")) {
+            files.push({ fileName: entry.name, source: readFileSync(fullPath, "utf-8"), siblingFiles: [] });
+            continue;
+        }
+
+        if (!entry.isDirectory()) continue;
+
+        const indexPath = join(fullPath, "index.js");
+        if (existsSync(indexPath) && statSync(indexPath).isFile()) {
+            files.push({ fileName: entry.name, source: readFileSync(indexPath, "utf-8"), siblingFiles: readSiblingFiles(fullPath) });
+        }
+    }
+
+    return files;
+}
+
 ipcMain.handle(IpcEvents.OPEN_QUICKCSS, () => shell.openPath(QUICK_CSS_PATH));
 
 ipcMain.handle(IpcEvents.OPEN_EXTERNAL, (_, url) => {
@@ -110,6 +164,8 @@ ipcMain.handle(IpcEvents.GET_THEME_SYSTEM_VALUES, () => {
 
 ipcMain.handle(IpcEvents.OPEN_THEMES_FOLDER, () => shell.openPath(THEMES_DIR));
 ipcMain.handle(IpcEvents.OPEN_SETTINGS_FOLDER, () => shell.openPath(SETTINGS_DIR));
+ipcMain.handle(IpcEvents.OPEN_USERPLUGINS_FOLDER, () => shell.openPath(USERPLUGINS_DIR));
+ipcMain.on(IpcEvents.GET_USER_PLUGINS, e => { e.returnValue = getUserPluginEntries(); });
 
 ipcMain.handle(IpcEvents.INIT_FILE_WATCHERS, ({ sender }) => {
     let quickCssWatcher: FSWatcher | undefined;
@@ -125,6 +181,9 @@ ipcMain.handle(IpcEvents.INIT_FILE_WATCHERS, ({ sender }) => {
     const themesWatcher = watch(THEMES_DIR, { persistent: false }, debounce(() => {
         sender.postMessage(IpcEvents.THEME_UPDATE, void 0);
     }));
+    const userPluginsWatcher = watch(USERPLUGINS_DIR, { persistent: false }, debounce(() => {
+        sender.postMessage(IpcEvents.USER_PLUGINS_UPDATE, void 0);
+    }, 100));
 
     if (IS_DEV) {
         rendererCssWatcher = watch(RENDERER_CSS_PATH, { persistent: false }, async () => {
@@ -135,6 +194,7 @@ ipcMain.handle(IpcEvents.INIT_FILE_WATCHERS, ({ sender }) => {
     sender.once("destroyed", () => {
         quickCssWatcher?.close();
         themesWatcher.close();
+        userPluginsWatcher?.close();
         rendererCssWatcher?.close();
     });
 });

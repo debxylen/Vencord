@@ -35,6 +35,16 @@ declare module "~git-remote" {
     export default remote;
 }
 
+declare module "~runtime-userplugin-modules" {
+    const modules: Record<string, any>;
+    export default modules;
+}
+
+declare module "~runtime-userplugin-plugin-modules" {
+    const modules: Record<string, () => any>;
+    export default modules;
+}
+
 declare module "file://*" {
     const content: string;
     export default content;

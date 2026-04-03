@@ -145,7 +145,7 @@ export const globPlugins = kind => ({
         });
 
         build.onLoad({ filter, namespace: "import-plugins" }, async () => {
-            const pluginDirs = ["plugins/_api", "plugins/_core", "plugins", "userplugins"];
+            const pluginDirs = ["plugins/_api", "plugins/_core", "plugins"];
             let code = "";
             let pluginsCode = "\n";
             let metaCode = "\n";
@@ -235,6 +235,167 @@ export const gitRemotePlugin = {
             }
 
             return { contents: `export default "${remote}"` };
+        });
+    }
+};
+
+const runtimeModuleRoots = [
+    { alias: "@api", dir: "api" },
+    { alias: "@components", dir: "components" },
+    { alias: "@shared", dir: "shared" },
+    { alias: "@utils", dir: "utils" },
+];
+
+/**
+ * @param {string} rootDir
+ * @param {(relativePath: string) => boolean} [predicate]
+ */
+async function collectRuntimeModuleFiles(rootDir, predicate = () => true) {
+    const collected = [];
+
+    async function walk(relativeDir = "") {
+        const absoluteDir = resolve(rootDir, relativeDir);
+        if (!await exists(absoluteDir)) return;
+
+        const entries = await readdir(absoluteDir, { withFileTypes: true });
+        for (const entry of entries) {
+            if (entry.name.startsWith(".")) continue;
+
+            const relativePath = relativeDir ? `${relativeDir}/${entry.name}` : entry.name;
+            if (entry.isDirectory()) {
+                await walk(relativePath);
+                continue;
+            }
+
+            if (!/\.[mc]?[jt]sx?$/.test(entry.name)) continue;
+            if (!predicate(relativePath)) continue;
+
+            collected.push(relativePath.replaceAll("\\", "/"));
+        }
+    }
+
+    await walk();
+    return collected.sort();
+}
+
+function aliasCandidates(aliasPrefix, relativePath) {
+    const withoutExt = relativePath.replace(/\.[mc]?[jt]sx?$/, "");
+    const normalized = withoutExt.replace(/\/index$/i, "");
+    const candidates = new Set([
+        `${aliasPrefix}/${withoutExt}`,
+        `${aliasPrefix}/${withoutExt}.js`
+    ]);
+
+    if (normalized !== withoutExt) {
+        candidates.add(`${aliasPrefix}/${normalized}`);
+        candidates.add(`${aliasPrefix}/${normalized}.js`);
+    }
+
+    if (!normalized) {
+        candidates.add(aliasPrefix);
+        candidates.add(`${aliasPrefix}/index`);
+        candidates.add(`${aliasPrefix}/index.js`);
+    }
+
+    return [...candidates];
+}
+
+/**
+ * generate static alias table for renderer-side modules like
+ * `@api/*`, `@utils/*`, and `@components/*`.
+ */
+export const runtimeUserPluginModulesPlugin = {
+    name: "runtime-userplugin-modules",
+    setup(build) {
+        const filter = /^~runtime-userplugin-modules$/;
+        build.onResolve({ filter }, args => ({
+            namespace: "runtime-userplugin-modules",
+            path: args.path
+        }));
+
+        build.onLoad({ filter, namespace: "runtime-userplugin-modules" }, async () => {
+            let code = "";
+            const moduleEntries = [];
+            let index = 0;
+
+            for (const { alias, dir } of runtimeModuleRoots) {
+                const files = await collectRuntimeModuleFiles(join("src", dir), relativePath => !/\/native\.[mc]?[jt]sx?$/i.test(relativePath));
+                for (const file of files) {
+                    const importName = `m${index++}`;
+                    code += `import * as ${importName} from "./${dir}/${file.replace(/\.[mc]?[jt]sx?$/, "")}";\n`;
+
+                    for (const id of aliasCandidates(alias, file)) {
+                        moduleEntries.push(`${JSON.stringify(id)}:${importName}`);
+                    }
+                }
+            }
+
+            code += `import * as webpackCommon from "./webpack/common";\n`;
+            code += `import * as webpackRoot from "./webpack";\n`;
+            code += `import * as webpackPatcher from "./webpack/patchWebpack";\n`;
+            moduleEntries.push(`"@webpack/common":webpackCommon`, `"@webpack/common/index":webpackCommon`, `"@webpack/common/index.js":webpackCommon`);
+            moduleEntries.push(`"@webpack":webpackRoot`, `"@webpack/index":webpackRoot`, `"@webpack/index.js":webpackRoot`);
+            moduleEntries.push(`"@webpack/patcher":webpackPatcher`, `"@webpack/patcher.js":webpackPatcher`);
+
+            code += `export default {${moduleEntries.join(",")}};`;
+            return {
+                contents: code,
+                resolveDir: "./src",
+                watchDirs: runtimeModuleRoots.map(({ dir }) => resolve("src", dir)).concat(resolve("src", "webpack")),
+            };
+        });
+    }
+};
+
+// this has problematic sideffects so skip eager import
+const runtimeUserPluginEagerImportDenylist = new Set([
+    "youtubeAdblock.desktop/adguard.js",
+    // i dont know more rn
+]);
+
+/**
+ * generate static thunk table for nested built-in plugin imports like `@plugins/foo/bar`
+ */
+export const runtimeUserPluginPluginModulesPlugin = {
+    name: "runtime-userplugin-plugin-modules",
+    setup(build) {
+        const filter = /^~runtime-userplugin-plugin-modules$/;
+        build.onResolve({ filter }, args => ({
+            namespace: "runtime-userplugin-plugin-modules",
+            path: args.path
+        }));
+
+        build.onLoad({ filter, namespace: "runtime-userplugin-plugin-modules" }, async () => {
+            const pluginFiles = await collectRuntimeModuleFiles(
+                join("src", "plugins"),
+                relativePath => !/\/native\.[mc]?[jt]sx?$/i.test(relativePath)
+                    && !runtimeUserPluginEagerImportDenylist.has(relativePath.replaceAll("\\", "/").replace(/\.[mc]?[jt]sx?$/i, ".js"))
+            );
+            let code = `
+function interop(mod){
+    if (typeof mod?.default === "function") return Object.assign(mod.default, mod, { default: mod.default });
+    return mod?.default ?? mod;
+}
+`;
+            const moduleEntries = [];
+            let importIndex = 0;
+
+            for (let i = 0; i < pluginFiles.length; i++) {
+                const file = pluginFiles[i];
+                const importName = `m${importIndex++}`;
+                code += `import * as ${importName} from "./plugins/${file.replace(/\.[mc]?[jt]sx?$/, "")}";\n`;
+
+                for (const id of aliasCandidates("@plugins", file)) {
+                    moduleEntries.push(`${JSON.stringify(id)}:()=>interop(${importName})`);
+                }
+            }
+
+            code += `export default {${moduleEntries.join(",")}};`;
+            return {
+                contents: code,
+                resolveDir: "./src",
+                watchDirs: [resolve("src", "plugins")],
+            };
         });
     }
 };
@@ -354,7 +515,7 @@ export const commonOpts = {
     sourcemap: watch ? "inline" : "external",
     legalComments: "linked",
     banner,
-    plugins: [fileUrlPlugin, gitHashPlugin, gitRemotePlugin, stylePlugin],
+    plugins: [fileUrlPlugin, gitHashPlugin, gitRemotePlugin, runtimeUserPluginModulesPlugin, runtimeUserPluginPluginModulesPlugin, stylePlugin],
     external: ["~plugins", "~git-hash", "~git-remote", "/assets/*"],
     inject: ["./scripts/build/inject/react.mjs"],
     jsx: "transform",

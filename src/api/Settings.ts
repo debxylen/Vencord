@@ -41,6 +41,7 @@ export interface Settings {
     autoUpdate: boolean;
     autoUpdateNotification: boolean,
     useQuickCss: boolean;
+    userPluginWarningDismissed: boolean;
     eagerPatches: boolean;
     enabledThemes: string[];
     enableReactDevtools: boolean;
@@ -95,6 +96,7 @@ const DefaultSettings: Settings = {
     autoUpdate: true,
     autoUpdateNotification: true,
     useQuickCss: true,
+    userPluginWarningDismissed: false,
     themeLinks: [],
     eagerPatches: false, // Eagerly patching no longer works due to module factories with the same id being able to have different sources now.
     enabledThemes: [],

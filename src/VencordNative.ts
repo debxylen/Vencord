@@ -59,6 +59,18 @@ export default {
         openFolder: () => invoke<void>(IpcEvents.OPEN_SETTINGS_FOLDER),
     },
 
+    userPlugins: {
+        get: () => sendSync<Array<{
+            fileName: string;
+            source: string;
+            siblingFiles: Array<{ path: string; content: string; }>;
+        }>>(IpcEvents.GET_USER_PLUGINS),
+        openFolder: () => invoke<void>(IpcEvents.OPEN_USERPLUGINS_FOLDER),
+        addChangeListener: (cb: () => void) => {
+            ipcRenderer.on(IpcEvents.USER_PLUGINS_UPDATE, () => cb());
+        },
+    },
+
     quickCss: {
         get: () => invoke<string>(IpcEvents.GET_QUICK_CSS),
         set: (css: string) => invoke<void>(IpcEvents.SET_QUICK_CSS, css),
