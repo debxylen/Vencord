@@ -163,6 +163,60 @@ function SlowPluginsSection() {
     );
 }
 
+function PatchBootstrapSection() {
+    const profile = getStartupProfile();
+    const slowBootstrap = profile.patchBootstrap.slice(0, 25);
+
+    return (
+        <section>
+            <Forms.FormTitle tag="h2">Patch Bootstrap</Forms.FormTitle>
+            <code>
+                <div style={{ color: "var(--text-strong)", display: "grid", gridTemplateColumns: "auto auto auto 1fr", gap: "2px 10px", userSelect: "text" }}>
+                    <span>Start</span>
+                    <span>Duration</span>
+                    <span>Patches</span>
+                    <span style={{ marginBottom: 5 }}>Plugin</span>
+                    {slowBootstrap.map((entry, i) => (
+                        <React.Fragment key={i}>
+                            <span>{((entry.startedAt - profile.bootAt) / 1000).toFixed(3)}s</span>
+                            <span>{entry.duration.toFixed(1)}ms</span>
+                            <span>{entry.patchCount}</span>
+                            <span>{entry.plugin}</span>
+                        </React.Fragment>
+                    ))}
+                </div>
+            </code>
+        </section>
+    );
+}
+
+function PatchedModulesSection() {
+    const profile = getStartupProfile();
+    const slowModules = profile.patchedModules.slice(0, 25);
+
+    return (
+        <section>
+            <Forms.FormTitle tag="h2">Slowest Patched Modules</Forms.FormTitle>
+            <code>
+                <div style={{ color: "var(--text-strong)", display: "grid", gridTemplateColumns: "auto auto auto 1fr", gap: "2px 10px", userSelect: "text" }}>
+                    <span>Start</span>
+                    <span>Duration</span>
+                    <span>Repls</span>
+                    <span style={{ marginBottom: 5 }}>Module / Plugins</span>
+                    {slowModules.map((entry, i) => (
+                        <React.Fragment key={i}>
+                            <span>{((entry.startedAt - profile.bootAt) / 1000).toFixed(3)}s</span>
+                            <span>{entry.duration.toFixed(1)}ms</span>
+                            <span>{entry.replacements}</span>
+                            <span>{String(entry.moduleId)} {entry.plugins.length ? `(${entry.plugins.join(", ")})` : ""}</span>
+                        </React.Fragment>
+                    ))}
+                </div>
+            </code>
+        </section>
+    );
+}
+
 interface ServerTraceProps {
     trace: string;
 }
@@ -198,6 +252,10 @@ function StartupTimingPage() {
             />
             <div style={{ marginTop: 5 }}>&nbsp;</div>
             <VencordPhaseSection />
+            <div style={{ marginTop: 5 }}>&nbsp;</div>
+            <PatchBootstrapSection />
+            <div style={{ marginTop: 5 }}>&nbsp;</div>
+            <PatchedModulesSection />
             <div style={{ marginTop: 5 }}>&nbsp;</div>
             <SlowPluginsSection />
             <div style={{ marginTop: 5 }}>&nbsp;</div>

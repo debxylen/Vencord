@@ -31,16 +31,37 @@ type StartupPluginEntry = {
     endedAt: number;
 };
 
+type StartupPatchBootstrapEntry = {
+    plugin: string;
+    duration: number;
+    startedAt: number;
+    endedAt: number;
+    patchCount: number;
+};
+
+type StartupPatchedModuleEntry = {
+    moduleId: PropertyKey;
+    duration: number;
+    startedAt: number;
+    endedAt: number;
+    replacements: number;
+    plugins: string[];
+};
+
 type StartupProfilerState = {
     bootAt: number;
     phases: StartupPhaseEntry[];
     plugins: StartupPluginEntry[];
+    patchBootstrap: StartupPatchBootstrapEntry[];
+    patchedModules: StartupPatchedModuleEntry[];
 };
 
 const state: StartupProfilerState = {
     bootAt: performance.now(),
     phases: [],
-    plugins: []
+    plugins: [],
+    patchBootstrap: [],
+    patchedModules: []
 };
 
 function recordPhase(name: string, startedAt: number, endedAt: number) {
@@ -56,6 +77,27 @@ function recordPlugin(name: string, stage: string, startedAt: number, endedAt: n
     state.plugins.push({
         name,
         stage,
+        startedAt,
+        endedAt,
+        duration: endedAt - startedAt
+    });
+}
+
+function recordPatchBootstrap(plugin: string, patchCount: number, startedAt: number, endedAt: number) {
+    state.patchBootstrap.push({
+        plugin,
+        patchCount,
+        startedAt,
+        endedAt,
+        duration: endedAt - startedAt
+    });
+}
+
+function recordPatchedModule(moduleId: PropertyKey, replacements: number, plugins: string[], startedAt: number, endedAt: number) {
+    state.patchedModules.push({
+        moduleId,
+        replacements,
+        plugins,
         startedAt,
         endedAt,
         duration: endedAt - startedAt
@@ -78,11 +120,20 @@ export function recordPluginStartup(name: string, stage: string, startedAt: numb
     recordPlugin(name, stage, startedAt, endedAt);
 }
 
+export function recordPatchBootstrapTiming(plugin: string, patchCount: number, startedAt: number, endedAt: number) {
+    recordPatchBootstrap(plugin, patchCount, startedAt, endedAt);
+}
+
+export function recordPatchedModuleTiming(moduleId: PropertyKey, replacements: number, plugins: string[], startedAt: number, endedAt: number) {
+    recordPatchedModule(moduleId, replacements, plugins, startedAt, endedAt);
+}
+
 export function getStartupProfile() {
     return {
         bootAt: state.bootAt,
         phases: [...state.phases].sort((a, b) => a.startedAt - b.startedAt),
-        plugins: [...state.plugins].sort((a, b) => b.duration - a.duration)
+        plugins: [...state.plugins].sort((a, b) => b.duration - a.duration),
+        patchBootstrap: [...state.patchBootstrap].sort((a, b) => b.duration - a.duration),
+        patchedModules: [...state.patchedModules].sort((a, b) => b.duration - a.duration)
     };
 }
-

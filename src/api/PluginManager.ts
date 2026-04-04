@@ -38,7 +38,7 @@ import { patches } from "@webpack/patcher";
 
 import Plugins from "~plugins";
 
-import { recordPluginStartup } from "../debug/startupProfiler";
+import { recordPatchBootstrapTiming, recordPluginStartup } from "../debug/startupProfiler";
 export { Plugins as plugins };
 const logger = new Logger("PluginManager", "#a6d189");
 
@@ -384,9 +384,11 @@ export const initPluginManager = onlyOnce(function init() {
 
         if (p.patches && isPluginEnabled(p.name)) {
             if (!IS_REPORTER || isReporterTestable(p, ReporterTestable.Patches)) {
+                const patchBootstrapStartedAt = performance.now();
                 for (const patch of p.patches) {
                     addPatch(patch, p.name);
                 }
+                recordPatchBootstrapTiming(p.name, p.patches.length, patchBootstrapStartedAt, performance.now());
             }
         }
     }

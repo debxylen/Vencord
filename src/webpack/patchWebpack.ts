@@ -5,13 +5,14 @@
  */
 
 import { Settings } from "@api/Settings";
-import { traceFunctionWithResults } from "@debug/Tracer";
 import { makeLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
 import { interpolateIfDefined } from "@utils/misc";
 import { Patch, PatchReplacement } from "@utils/types";
 import { WebpackRequire } from "@vencord/discord-types/webpack";
 
+import { recordPatchedModuleTiming } from "../debug/startupProfiler";
+import { traceFunctionWithResults } from "../debug/Tracer";
 import { AnyModuleFactory, AnyWebpackRequire, MaybePatchedModuleFactory, PatchedModuleFactory } from "./types";
 import { _blacklistBadModules, _initWebpack, factoryListeners, findModuleFactory, moduleListeners, waitForSubscriptions, wreq } from "./webpack";
 
@@ -502,6 +503,7 @@ function runFactoryWithWrap(patchedFactory: PatchedModuleFactory, thisArg: unkno
  * @returns The patched module factory
  */
 function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory): PatchedModuleFactory {
+    const patchStartedAt = performance.now();
     const originalFactoryCode = String(originalFactory);
     const isArrowFunction = originalFactoryCode.startsWith("(");
 
@@ -511,6 +513,7 @@ function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory):
     let patchedFactory = originalFactory;
 
     const patchedBy = new Set<string>();
+    let appliedReplacementCount = 0;
 
     for (let i = 0; i < patches.length; i++) {
         const patch = patches[i];
@@ -598,6 +601,7 @@ function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory):
                 code = newCode;
                 patchedSource = `// Webpack Module ${String(moduleId)} - Patched by ${pluginsList.join(", ")}\n${code}\n//# sourceURL=file:///WebpackModule${String(moduleId)}`;
                 patchedFactory = (0, eval)(patchedSource);
+                appliedReplacementCount++;
 
                 if (!patchedBy.has(patch.plugin)) {
                     patchedBy.add(patch.plugin);
@@ -640,6 +644,10 @@ function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory):
     if (IS_DEV && patchedFactory !== originalFactory) {
         originalFactory[SYM_PATCHED_SOURCE] = patchedSource;
         originalFactory[SYM_PATCHED_BY] = patchedBy;
+    }
+
+    if (patchedFactory !== originalFactory) {
+        recordPatchedModuleTiming(moduleId, appliedReplacementCount, [...patchedBy], patchStartedAt, performance.now());
     }
 
     return patchedFactory as PatchedModuleFactory;
