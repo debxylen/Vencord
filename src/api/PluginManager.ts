@@ -43,6 +43,8 @@ export { Plugins as plugins };
 const logger = new Logger("PluginManager", "#a6d189");
 
 export const PMLogger = logger;
+const deferredPluginStarts = new Set<string>();
+let deferredFlushScheduled = false;
 
 /** Whether we have subscribed to flux events of all the enabled plugins when FluxDispatcher was ready */
 let enabledPluginsSubscribedFlux = false;
@@ -107,10 +109,47 @@ export const startAllPlugins = traceFunction("startAllPlugins", function startAl
             const startAt = p.startAt ?? StartAt.WebpackReady;
             if (startAt !== target) continue;
 
-            startPlugin(Plugins[name]);
+            if (target === StartAt.WebpackReady && p.deferStart) {
+                enqueueDeferredPluginStart(p.name);
+                continue;
+            }
+
+            startPlugin(Plugins[name], target);
         }
     }
 });
+
+function scheduleDeferredPluginFlush() {
+    if (deferredFlushScheduled) return;
+    deferredFlushScheduled = true;
+
+    const flush = () => {
+        deferredFlushScheduled = false;
+        flushDeferredPluginStarts();
+    };
+
+    if ("requestIdleCallback" in window) {
+        requestIdleCallback(flush, { timeout: 5_000 });
+    } else {
+        setTimeout(flush, 1_500);
+    }
+}
+
+function enqueueDeferredPluginStart(pluginName: string) {
+    deferredPluginStarts.add(pluginName);
+    scheduleDeferredPluginFlush();
+}
+
+function flushDeferredPluginStarts() {
+    for (const pluginName of [...deferredPluginStarts]) {
+        deferredPluginStarts.delete(pluginName);
+
+        const plugin = Plugins[pluginName];
+        if (!plugin || plugin.started || !isPluginEnabled(pluginName)) continue;
+
+        startPlugin(plugin, "DeferredWebpackReady");
+    }
+}
 
 export function startDependenciesRecursive(p: Plugin) {
     const settings = Settings.plugins;
@@ -182,7 +221,7 @@ export function subscribeAllPluginsFluxEvents(fluxDispatcher: typeof FluxDispatc
     }
 }
 
-export const startPlugin = traceFunction("startPlugin", function startPlugin(p: Plugin) {
+export const startPlugin = traceFunction("startPlugin", function startPlugin(p: Plugin, stage = p.startAt ?? StartAt.WebpackReady) {
     const pluginStartAt = performance.now();
     const {
         name, commands, contextMenus, managedStyle, userProfileBadge,
@@ -243,9 +282,9 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
     if (renderMessageAccessory) addMessageAccessory(name, renderMessageAccessory);
     if (messagePopoverButton) addMessagePopoverButton(name, messagePopoverButton.render, messagePopoverButton.icon);
 
-    recordPluginStartup(name, p.startAt ?? StartAt.WebpackReady, pluginStartAt, performance.now());
+    recordPluginStartup(name, stage, pluginStartAt, performance.now());
     return true;
-}, p => `startPlugin ${p.name}`);
+}, (p, stage) => `startPlugin ${p.name} (${stage ?? p.startAt ?? StartAt.WebpackReady})`);
 
 export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plugin) {
     const {

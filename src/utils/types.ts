@@ -160,6 +160,11 @@ export interface PluginDef {
      */
     requiresRestart?: boolean;
     /**
+     * Whether this plugin's runtime start should be deferred until after startup.
+     * Patches still register and apply in the normal early path.
+     */
+    deferStart?: boolean;
+    /**
      * When to call the start() method
      * @default StartAt.WebpackReady
      */
