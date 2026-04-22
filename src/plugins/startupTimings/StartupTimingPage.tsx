@@ -18,10 +18,9 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
+import { getStartupProfile } from "@debug/startupProfiler";
 import { findByPropsLazy } from "@webpack";
 import { Forms, React } from "@webpack/common";
-
-import { getStartupProfile } from "../../debug/startupProfiler";
 
 interface AppStartPerformance {
     prefix: string;

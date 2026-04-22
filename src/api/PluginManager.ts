@@ -27,6 +27,7 @@ import { addMessageClickListener, addMessagePreEditListener, addMessagePreSendLi
 import { addMessagePopoverButton, removeMessagePopoverButton } from "@api/MessagePopover";
 import { Settings, SettingsStore } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
+import { recordPatchBootstrapTiming, recordPluginStartup } from "@debug/startupProfiler";
 import { traceFunction } from "@debug/Tracer";
 import { Logger } from "@utils/Logger";
 import { onlyOnce } from "@utils/onlyOnce";
@@ -37,8 +38,6 @@ import { FluxDispatcher } from "@webpack/common";
 import { patches } from "@webpack/patcher";
 
 import Plugins from "~plugins";
-
-import { recordPatchBootstrapTiming, recordPluginStartup } from "../debug/startupProfiler";
 export { Plugins as plugins };
 const logger = new Logger("PluginManager", "#a6d189");
 

@@ -13,3 +13,4 @@ for /f "delims=" %%i in ('dir "%DISCORD_DIR%\app-*" /b /ad-h /o-n') do (
 
 :run
 start "" "%DISCORD_DIR%\!LATEST!\Discord.exe"
+exit

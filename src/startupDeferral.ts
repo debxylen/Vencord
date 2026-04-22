@@ -19,8 +19,8 @@
 // has inlined dupes and raw logs for a reason i know
 
 import { SYM_BUNDLE_FILE } from "./webpack/symConsts";
-import { factoryTransformers } from "./webpack/webpack";
 import { AnyModuleFactory } from "./webpack/types";
+import { factoryTransformers } from "./webpack/webpack";
 
 type StartupFactoryPatch = {
     find: string;
@@ -71,7 +71,7 @@ const splitSubExecStr = `(function(){
 const startupFactoryPatches: StartupFactoryPatch[] = [
     {
         find: "StreamingCapabilitiesStore",
-        match: /initialize\(\)\{!l\.isPlatformEmbedded\|\|__OVERLAY__\|\|r\.Ay\.getGPUDriverVersions\(\)\.then\(\e\=>\{c=\(0,d\.A\)\(e\),u=\(0,s\.A\)\(e\),A=\(0,o\.A\)\(e\),this\.emitChange\(\)\}\)\}/,
+        match: /initialize\(\)\{!l\.isPlatformEmbedded\|\|__OVERLAY__\|\|r\.Ay\.getGPUDriverVersions\(\)\.then\(e=>\{c=\(0,d\.A\)\(e\),u=\(0,s\.A\)\(e\),A=\(0,o\.A\)\(e\),this\.emitChange\(\)\}\)\}/,
         replace: "initialize(){c=false;u=true;A=false;this.emitChange();}",
     },
     {
