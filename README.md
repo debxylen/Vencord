@@ -4,6 +4,7 @@
 
 Parallel vencord fork with:
 - Support for adding plugins without rebuilding Vencord
+- Faster startups (more effectively on reloads)
 - Some of the plugins I personally use, namely:
   * typingFriends
   * lastdm (userplugin)
