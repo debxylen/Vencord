@@ -111,10 +111,12 @@ export const filters = {
 
 export type CallbackFn = (module: ModuleExports, id: PropertyKey) => void;
 export type FactoryListernFn = (factory: AnyModuleFactory, moduleId: PropertyKey) => void;
+export type FactoryTransformerFn = (factory: AnyModuleFactory, moduleId: PropertyKey) => AnyModuleFactory;
 
 export const waitForSubscriptions = new Map<FilterFn, CallbackFn>();
 export const moduleListeners = new Set<CallbackFn>();
 export const factoryListeners = new Set<FactoryListernFn>();
+export const factoryTransformers = new Set<FactoryTransformerFn>();
 
 export function _initWebpack(webpackRequire: WebpackRequire) {
     wreq = webpackRequire;
