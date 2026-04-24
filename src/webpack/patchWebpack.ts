@@ -13,9 +13,9 @@ import { interpolateIfDefined } from "@utils/misc";
 import { Patch, PatchReplacement } from "@utils/types";
 import { WebpackRequire } from "@vencord/discord-types/webpack";
 
-import { SYM_IS_PROXIED_FACTORY, SYM_ORIGINAL_FACTORY, SYM_ORIGINAL_MODULE_FACTORIES, SYM_PATCHED_BY, SYM_PATCHED_SOURCE } from "./symConsts";
+import { SYM_BUNDLE_FILE, SYM_IS_PROXIED_FACTORY, SYM_ORIGINAL_FACTORY, SYM_ORIGINAL_MODULE_FACTORIES, SYM_PATCHED_BY, SYM_PATCHED_SOURCE } from "./symConsts";
 import { AnyModuleFactory, AnyWebpackRequire, MaybePatchedModuleFactory, PatchedModuleFactory } from "./types";
-import { _blacklistBadModules, _initWebpack, factoryListeners, findModuleFactory, moduleListeners, waitForSubscriptions, wreq } from "./webpack";
+import { _blacklistBadModules, _initWebpack, factoryListeners, factoryTransformers, findModuleFactory, moduleListeners, waitForSubscriptions, wreq } from "./webpack";
 
 export const patches = [] as Patch[];
 export const allWebpackInstances = new Set<AnyWebpackRequire>();
@@ -278,6 +278,23 @@ const moduleFactoryHandler: ProxyHandler<MaybePatchedModuleFactory> = {
 };
 
 function proxyFactoryAndUpdateExisting(moduleFactories: AnyWebpackRequire["m"], moduleId: PropertyKey, newFactory: AnyModuleFactory, receiver: any, ignoreExistingInTarget = false) {
+    const bundleFile = moduleFactories[SYM_BUNDLE_FILE];
+    if (bundleFile != null) {
+        newFactory[SYM_BUNDLE_FILE] = bundleFile;
+    }
+
+    for (const factoryTransformer of factoryTransformers) {
+        try {
+            newFactory = factoryTransformer(newFactory, moduleId);
+        } catch (err) {
+            logger.error("Error in Webpack factory transformer:\n", err, factoryTransformer);
+        }
+    }
+
+    if (bundleFile != null) {
+        newFactory[SYM_BUNDLE_FILE] = bundleFile;
+    }
+
     notifyFactoryListeners(moduleId, newFactory);
     const proxiedFactory = new Proxy(Settings.eagerPatches ? patchFactory(moduleId, newFactory) : newFactory, moduleFactoryHandler);
 

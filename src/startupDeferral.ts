@@ -16,8 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-// has inlined dupes and raw logs for a reason i know
-
 import { SYM_BUNDLE_FILE } from "./webpack/symConsts";
 import { AnyModuleFactory } from "./webpack/types";
 import { factoryTransformers } from "./webpack/webpack";
@@ -67,6 +65,8 @@ const splitSubExecStr = `(function(){
       handler.dispatch(t, n, i);
     }
   }).call(this)`;
+
+// BORING TODO: capture actual minified vars used instead of hardcoding it
 
 const startupFactoryPatches: StartupFactoryPatch[] = [
     {
