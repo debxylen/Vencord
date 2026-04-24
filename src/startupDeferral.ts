@@ -24,11 +24,12 @@ type StartupFactoryPatch = {
     find: string;
     bundleFilePrefix?: string;
     match: RegExp;
-    replace: string;
+    replace: string | ((...args: any[]) => string);
 };
 
-const splitSubExecStr = `(function(){
-    const handler = this.getDispatchHandler(n);
+function makeSplitSubExecStr(_: string, actionVar: string, payloadVar: string, thirdArgVar: string) {
+    return `(function(){
+    const handler = this.getDispatchHandler(${actionVar});
     if (!handler) return;
 
     const depGraph = this._actionHandlers?._dependencyGraph;
@@ -45,7 +46,7 @@ const splitSubExecStr = `(function(){
 
           try {
             if (node?.actionHandler) {
-              node.actionHandler(t, n, i);
+              node.actionHandler(${payloadVar}, ${actionVar}, ${thirdArgVar});
             }
           } catch (e) {
             console.error(e);
@@ -62,41 +63,40 @@ const splitSubExecStr = `(function(){
 
       run();
     } else {
-      handler.dispatch(t, n, i);
+      handler.dispatch(${payloadVar}, ${actionVar}, ${thirdArgVar});
     }
   }).call(this)`;
-
-// BORING TODO: capture actual minified vars used instead of hardcoding it
+}
 
 const startupFactoryPatches: StartupFactoryPatch[] = [
     {
         find: "StreamingCapabilitiesStore",
-        match: /initialize\(\)\{!l\.isPlatformEmbedded\|\|__OVERLAY__\|\|r\.Ay\.getGPUDriverVersions\(\)\.then\(e=>\{c=\(0,d\.A\)\(e\),u=\(0,s\.A\)\(e\),A=\(0,o\.A\)\(e\),this\.emitChange\(\)\}\)\}/,
-        replace: "initialize(){c=false;u=true;A=false;this.emitChange();}",
+        match: /initialize\(\)\{!([A-Za-z_$][\w$]*)\.isPlatformEmbedded\|\|__OVERLAY__\|\|([A-Za-z_$][\w$]*)\.Ay\.getGPUDriverVersions\(\)\.then\([\s\S]*?\)\}get GPUDriversOutdated\(\)\{return ([A-Za-z_$][\w$]*)\}get canUseHardwareAcceleration\(\)\{return ([A-Za-z_$][\w$]*)\}get problematicGPUDriver\(\)\{return ([A-Za-z_$][\w$]*)\}/,
+        replace: "initialize(){$3=false;$4=true;$5=false;this.emitChange();}get GPUDriversOutdated(){return $3}get canUseHardwareAcceleration(){return $4}get problematicGPUDriver(){return $5}",
     },
     {
-        find: "dispatchMultiple(e,t){",
+        find: "dispatchMultiple(",
         bundleFilePrefix: "web.",
-        match: /;let l=0;/,
-        replace: ";let l=0;let c0=performance.now();"
+        match: /;let ([A-Za-z_$][\w$]*)=0;/,
+        replace: ";let $1=0;let __vencordStartupDispatchStart=performance.now();"
     },
     {
-        find: "dispatchMultiple(e,t){",
+        find: "dispatchMultiple(",
         bundleFilePrefix: "web.",
-        match: /if\(this\.dispatchOne\(s\),l=performance\.now\(\)-a,E\(s\.type,l\),g\(e,r,t\)\)\{/,
-        replace: "if(this.dispatchOne(s),l=performance.now()-a,E(s.type,l),performance.now()-c0>8||g(e,r,t)){"
+        match: /if\(this\.dispatchOne\(([A-Za-z_$][\w$]*)\),([A-Za-z_$][\w$]*)=performance\.now\(\)-([A-Za-z_$][\w$]*),([A-Za-z_$][\w$]*)\(\1\.type,\2\),([A-Za-z_$][\w$]*)\(([A-Za-z_$][\w$]*),([A-Za-z_$][\w$]*),([A-Za-z_$][\w$]*)\)\)\{/,
+        replace: "if(this.dispatchOne($1),$2=performance.now()-$3,$4($1.type,$2),performance.now()-__vencordStartupDispatchStart>8||$5($6,$7,$8)){"
     },
     {
-        find: "dispatchMultiple(e,t){",
+        find: "dispatchMultiple(",
         bundleFilePrefix: "web.",
-        match: /this\.getDispatchHandler\(n\)\?\.\s*dispatch\(t,\s*n,\s*i\)/,
-        replace: splitSubExecStr
+        match: /this\.getDispatchHandler\(([A-Za-z_$][\w$]*)\)\?\.\s*dispatch\(([A-Za-z_$][\w$]*),\s*\1,\s*([A-Za-z_$][\w$]*)\)/,
+        replace: makeSplitSubExecStr
     },
     {
-        find: "dispatchMultiple(e,t){",
+        find: "dispatchMultiple(",
         bundleFilePrefix: "web.",
-        match: /dispatchOne\(e\)\s*\{/,
-        replace: 'dispatchOne(e, defer=true){if(defer && e?.type==="GAMES_DATABASE_UPDATE"){setTimeout(()=>this.dispatchOne(e, false),2000);return;}'
+        match: /dispatchOne\(([A-Za-z_$][\w$]*)\)\s*\{/,
+        replace: 'dispatchOne($1, defer=true){if(defer && $1?.type==="GAMES_DATABASE_UPDATE"){setTimeout(()=>this.dispatchOne($1, false),2000);return;}'
     },
     {
         find: "__OVERLAY__||await (0,",
@@ -107,24 +107,24 @@ const startupFactoryPatches: StartupFactoryPatch[] = [
     {
         find: "Could not find app-mount",
         bundleFilePrefix: "web.",
-        match: /d\.A\.initialize\(\),l\.A\.initialize\(\),u\.A\.init\(\),f\.A\.init\(\),L\.A\.init\(\),c\.A\.initialize\(\),m\.A\.initialize\(\),g\.A\.initialize\(\),_\.n\(\),\(0,O\.wP\)\(\),B\(o\.A\.App\)/,
-        replace: "B(o.A.App)\nsetTimeout(()=>{d.A.initialize(),l.A.initialize(),u.A.init(),f.A.init(),L.A.init(),c.A.initialize(),m.A.initialize(),g.A.initialize(),_.n(),(0,O.wP)()},0)"
+        match: /([A-Za-z_$][\w$]*)\.A\.initialize\(\),([A-Za-z_$][\w$]*)\.A\.initialize\(\),([A-Za-z_$][\w$]*)\.A\.init\(\),([A-Za-z_$][\w$]*)\.A\.init\(\),([A-Za-z_$][\w$]*)\.A\.init\(\),([A-Za-z_$][\w$]*)\.A\.initialize\(\),([A-Za-z_$][\w$]*)\.A\.initialize\(\),([A-Za-z_$][\w$]*)\.A\.initialize\(\),([A-Za-z_$][\w$]*)\.n\(\),\(0,([A-Za-z_$][\w$]*)\.wP\)\(\),([A-Za-z_$][\w$]*)\(([A-Za-z_$][\w$]*)\.A\.App\)/,
+        replace: "$11($12.A.App)\nsetTimeout(()=>{$1.A.initialize(),$2.A.initialize(),$3.A.init(),$4.A.init(),$5.A.init(),$6.A.initialize(),$7.A.initialize(),$8.A.initialize(),$9.n(),(0,$10.wP)()},0)"
     },
     {
         find: "Hold Tight — Loading Discord",
-        match: /return t\s*\?\s*\(0,\s*i\.jsx\)\(y,[\s\S]*?\)\s*:\s*null/,
+        match: /return [A-Za-z_$][\w$]*\s*\?\s*\(0,\s*[A-Za-z_$][\w$]*\.jsx\)\([A-Za-z_$][\w$]*,[\s\S]*?\)\s*:\s*null/,
         replace: "return null"
     },
     {
         find: "children:_.message",
         bundleFilePrefix: "web.",
-        match: /d\?__OVERLAY__\?null:\(0,.\.jsx\)\("div",\{className:.\.L\}\):t\?\?null/,
-        replace: "t??null"
+        match: /[A-Za-z_$][\w$]*\?__OVERLAY__\?null:\(0,[A-Za-z_$][\w$]*\.jsx\)\("div",\{className:[A-Za-z_$][\w$]*\.L\}\):([A-Za-z_$][\w$]*)\?\?null/,
+        replace: "$1??null"
     },
     {
         find: "LAUNCH_APPLICATION",
-        match: /componentDidMount\(\)\{([^}]+?)this\.rewriterUnlisten=eb\.A\.addRouteRewriter\(this\.ensureChannelMatchesGuild\),this\.historyUnlisten=eb\.A\.addRouteChangeListener\(this\.handleHistoryChange\);?\}/,
-        replace: "componentDidMount(){setTimeout(()=>{$1this.rewriterUnlisten=eb.A.addRouteRewriter(this.ensureChannelMatchesGuild),this.historyUnlisten=eb.A.addRouteChangeListener(this.handleHistoryChange)},0)}"
+        match: /componentDidMount\(\)\{([^}]+?)this\.rewriterUnlisten=([A-Za-z_$][\w$]*)\.A\.addRouteRewriter\(this\.ensureChannelMatchesGuild\),this\.historyUnlisten=\2\.A\.addRouteChangeListener\(this\.handleHistoryChange\);?\}/,
+        replace: "componentDidMount(){setTimeout(()=>{$1this.rewriterUnlisten=$2.A.addRouteRewriter(this.ensureChannelMatchesGuild),this.historyUnlisten=$2.A.addRouteChangeListener(this.handleHistoryChange)},0)}"
     },
 ];
 
@@ -137,7 +137,7 @@ function patchFactory(factory: AnyModuleFactory, patch: StartupFactoryPatch) {
         return factory;
     }
 
-    const patchedSource = wrappedSource.replace(patch.match, patch.replace);
+    const patchedSource = wrappedSource.replace(patch.match, patch.replace as string);
     if (patchedSource === wrappedSource) {
         console.warn(`[STARTUP DEFERRAL] Startup patch had no effect for ${patch.find}: ${patch.match}`);
         return factory;
