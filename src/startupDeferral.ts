@@ -70,6 +70,12 @@ function makeSplitSubExecStr(_: string, actionVar: string, payloadVar: string, t
 
 const startupFactoryPatches: StartupFactoryPatch[] = [
     {
+        find: "--connecting-content-fade-duration",
+        bundleFilePrefix: "web.",
+        match: /if\(!this\.state\.shouldRender\)return null;/,
+        replace: "return null;"
+    },
+    {
         find: "StreamingCapabilitiesStore",
         match: /initialize\(\)\{!([A-Za-z_$][\w$]*)\.isPlatformEmbedded\|\|__OVERLAY__\|\|([A-Za-z_$][\w$]*)\.Ay\.getGPUDriverVersions\(\)\.then\([\s\S]*?\)\}get GPUDriversOutdated\(\)\{return ([A-Za-z_$][\w$]*)\}get canUseHardwareAcceleration\(\)\{return ([A-Za-z_$][\w$]*)\}get problematicGPUDriver\(\)\{return ([A-Za-z_$][\w$]*)\}/,
         replace: "initialize(){$3=false;$4=true;$5=false;this.emitChange();}get GPUDriversOutdated(){return $3}get canUseHardwareAcceleration(){return $4}get problematicGPUDriver(){return $5}",
