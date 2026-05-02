@@ -179,6 +179,8 @@ define(Function.prototype, "m", {
             logger.info("Found Webpack module factories" + interpolateIfDefined` in ${fileName}`);
             allWebpackInstances.add(this);
 
+            originalModules[SYM_BUNDLE_FILE] = fileName;
+
             // Proxy (and maybe patch) pre-populated factories
             for (const moduleId in originalModules) {
                 proxyFactoryAndUpdateExisting(originalModules, moduleId, originalModules[moduleId], originalModules, true);

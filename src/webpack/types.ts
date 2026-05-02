@@ -6,7 +6,7 @@
 
 import { Module, ModuleExports, WebpackRequire } from "@vencord/discord-types/webpack";
 
-import { SYM_ORIGINAL_FACTORY, SYM_ORIGINAL_MODULE_FACTORIES, SYM_PATCHED_BY, SYM_PATCHED_SOURCE } from "./symConsts";
+import { SYM_BUNDLE_FILE, SYM_ORIGINAL_FACTORY, SYM_ORIGINAL_MODULE_FACTORIES, SYM_PATCHED_BY, SYM_PATCHED_SOURCE } from "./symConsts";
 
 export type AnyWebpackRequire = ((moduleId: PropertyKey) => ModuleExports) & Partial<Omit<WebpackRequire, "m">> & {
     /** The module factories, where all modules that have been loaded are stored (pre-loaded or loaded by lazy chunks) */
@@ -15,10 +15,12 @@ export type AnyWebpackRequire = ((moduleId: PropertyKey) => ModuleExports) & Par
 
 export type AnyModuleFactories = Record<PropertyKey, AnyModuleFactory> & {
     [SYM_ORIGINAL_MODULE_FACTORIES]?: Record<PropertyKey, AnyModuleFactory>;
+    [SYM_BUNDLE_FILE]?: string;
 };
 
 /** exports can be anything, however initially it is always an empty object */
 export type AnyModuleFactory = ((this: ModuleExports, module: Module, exports: ModuleExports, require: AnyWebpackRequire) => void) & {
+    [SYM_BUNDLE_FILE]?: string;
     [SYM_PATCHED_SOURCE]?: string;
     [SYM_PATCHED_BY]?: Set<string>;
 };
