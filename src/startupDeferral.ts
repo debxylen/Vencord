@@ -18,7 +18,7 @@
 
 import { SYM_BUNDLE_FILE } from "./webpack/symConsts";
 import { AnyModuleFactory } from "./webpack/types";
-import { factoryTransformers } from "./webpack/webpack";
+import { factoryTransformers, onceReady } from "./webpack/webpack";
 
 type StartupFactoryPatch = {
     find: string;
@@ -134,45 +134,67 @@ function patchFactory(factory: AnyModuleFactory, patch: StartupFactoryPatch) {
     const wrappedSource = "0," + (!isArrowFunction ? "function" : "") + source.slice(source.indexOf("("));
 
     if (!wrappedSource.includes(patch.find)) {
-        return factory;
+        return { factory, findMatched: false, applied: false };
     }
 
     const patchedSource = wrappedSource.replace(patch.match, patch.replace as string);
     if (patchedSource === wrappedSource) {
-        console.warn(`[STARTUP DEFERRAL] Startup patch had no effect for ${patch.find}: ${patch.match}`);
-        return factory;
+        return { factory, findMatched: true, applied: false };
     }
 
     const evaluated = (0, eval)(`// StartupDeferral\n${patchedSource}\n//# sourceURL=file:///StartupDeferralPatch`);
     evaluated[SYM_BUNDLE_FILE] = factory[SYM_BUNDLE_FILE];
-    return evaluated;
+    return { factory: evaluated, findMatched: true, applied: true };
 }
 
-console.log("[STARTUP DEFERRAL] Applying startup patches");
+if (VencordNative.settings.get().plugins?.StartupDeferral?.enabled ?? false) {
+    console.log("[STARTUP DEFERRAL] Applying startup patches");
+    const startupPatchStats = new Map(startupFactoryPatches.map(patch => [patch, { matchedModuleCount: 0, appliedModuleCount: 0 }]));
 
-factoryTransformers.add((factory, moduleId) => {
-    const start = performance.now();
+    factoryTransformers.add((factory, moduleId) => {
+        const start = performance.now();
 
-    const bundleFile = factory[SYM_BUNDLE_FILE] as string | undefined;
-    let patchedFactory = factory;
+        const bundleFile = factory[SYM_BUNDLE_FILE] as string | undefined;
+        let patchedFactory = factory;
 
-    let patchedAny = false;
+        let patchedAny = false;
 
-    for (const patch of startupFactoryPatches) {
-        if (patch.bundleFilePrefix != null && !bundleFile?.startsWith(patch.bundleFilePrefix)) {
-            continue;
+        for (const patch of startupFactoryPatches) {
+            if (patch.bundleFilePrefix != null && !bundleFile?.startsWith(patch.bundleFilePrefix)) {
+                continue;
+            }
+
+            const result = patchFactory(patchedFactory, patch);
+            const stats = startupPatchStats.get(patch)!;
+
+            if (result.findMatched) stats.matchedModuleCount++;
+
+            if (result.applied) {
+                stats.appliedModuleCount++;
+                patchedFactory = result.factory;
+                console.log(`[STARTUP DEFERRAL] Applied startup patch to module ${String(moduleId)} (${patch.find})`);
+                patchedAny = true;
+            }
         }
 
-        const nextFactory = patchFactory(patchedFactory, patch);
-        if (nextFactory !== patchedFactory) {
-            patchedFactory = nextFactory;
-            console.log(`[STARTUP DEFERRAL] Applied startup patch to module ${String(moduleId)} (${patch.find})`);
-            patchedAny = true;
-        }
-    }
+        const end = performance.now();
+        if (patchedAny) console.log(`[STARTUP DEFERRAL] Total patch time for module ${String(moduleId)}: ${(end - start).toFixed(2)}ms`);
 
-    const end = performance.now();
-    if (patchedAny) console.log(`[STARTUP DEFERRAL] Total patch time for module ${String(moduleId)}: ${(end - start).toFixed(2)}ms`);
+        return patchedFactory;
+    });
 
-    return patchedFactory;
-});
+    queueMicrotask(() => {
+        void onceReady.then(() => {
+            for (const patch of startupFactoryPatches) {
+                const stats = startupPatchStats.get(patch)!;
+                if (stats.appliedModuleCount !== 0) continue;
+
+                console.warn(
+                    stats.matchedModuleCount === 0
+                        ? `[STARTUP DEFERRAL] Startup patch was never applied because no module matched ${patch.find}`
+                        : `[STARTUP DEFERRAL] Startup patch never applied successfully for ${patch.find}:\n${patch.match}`
+                );
+            }
+        });
+    });
+} else console.log("[STARTUP DEFERRAL] Startup patches disabled.");
