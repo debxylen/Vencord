@@ -18,7 +18,7 @@
 
 import { useSettings } from "@api/Settings";
 import { authorizeCloud, deauthorizeCloud } from "@api/SettingsSync/cloudSetup";
-import { deleteCloudSettings, eraseAllCloudData, getCloudSettings, putCloudSettings } from "@api/SettingsSync/cloudSync";
+import { deleteCloudSettings, eraseAllCloudData, getCloudSettings, getCloudSyncDirection, putCloudSettings, setCloudSyncDirection } from "@api/SettingsSync/cloudSync";
 import { BaseText } from "@components/BaseText";
 import { Button, ButtonProps } from "@components/Button";
 import { CheckedTextInput } from "@components/CheckedTextInput";
@@ -32,10 +32,9 @@ import { Link } from "@components/Link";
 import { Margins } from "@components/margins";
 import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
-import { localStorage } from "@utils/localStorage";
 import { classes } from "@utils/misc";
 import { IconComponent } from "@utils/types";
-import { Alerts, Select, Tooltip } from "@webpack/common";
+import { Alerts, Select, Tooltip, useState } from "@webpack/common";
 
 function validateUrl(url: string) {
     try {
@@ -126,6 +125,7 @@ function CloudSetupSection() {
 
 function SettingsSyncSection() {
     const { cloud } = useSettings([["cloud", "authenticated"], ["cloud", "settingsSync"]]);
+    const [syncDirection, setSyncDirection] = useState(getCloudSyncDirection);
     const sectionEnabled = cloud.authenticated && cloud.settingsSync;
 
     return (
@@ -170,10 +170,11 @@ function SettingsSyncSection() {
                                 value: "manual",
                             }
                         ]}
-                        isSelected={v => v === localStorage.Vencord_cloudSyncDirection}
+                        isSelected={v => v === syncDirection}
                         serialize={v => String(v)}
                         select={v => {
-                            localStorage.Vencord_cloudSyncDirection = v;
+                            setCloudSyncDirection(v);
+                            setSyncDirection(v);
                         }}
                         closeOnSelect={true}
                     />
