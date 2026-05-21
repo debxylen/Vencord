@@ -35,10 +35,9 @@ import { classNameFactory } from "@utils/css";
 import { isTruthy } from "@utils/guards";
 import { Logger } from "@utils/Logger";
 import { classes } from "@utils/misc";
-import { ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { useAwaiter, useCleanupEffect } from "@utils/react";
 import { PluginTag, PluginTags } from "@utils/types";
-import { Alerts, Button, lodash, Parser, React, SearchableSelect, Select, TextInput, Tooltip, useMemo, useState } from "@webpack/common";
+import { Button, ConfirmModal, lodash, openModal, Parser, React, SearchableSelect, Select, TextInput, Tooltip, useMemo, useState } from "@webpack/common";
 import { JSX } from "react";
 
 import Plugins, { ExcludedPlugins, PluginMeta } from "~plugins";
@@ -50,35 +49,24 @@ export const cl = classNameFactory("vc-plugins-");
 export const logger = new Logger("PluginSettings", "#a6d189");
 
 function openUserPluginWarningModal() {
-    openModal(modalProps => (
-        <ModalRoot {...modalProps} size={ModalSize.SMALL}>
-            <ModalHeader>
-                <HeadingTertiary>Local Plugins</HeadingTertiary>
-            </ModalHeader>
-            <ModalContent>
-                <Paragraph>External plugins are not reviewed or tested by Vencord and may break or cause issues.</Paragraph>
-                <Paragraph>Vencord does not provide support for problems caused by them.</Paragraph>
-                <Paragraph>Only use plugins you trust.</Paragraph>
-            </ModalContent>
-            <ModalFooter justify="end">
-                <Button
-                    color={Button.Colors.TRANSPARENT}
-                    onClick={modalProps.onClose}
-                    style={{ marginRight: "0.5rem" }}
-                >
-                    Go Back
-                </Button>
-                <Button
-                    onClick={() => {
-                        Settings.userPluginWarningDismissed = true;
-                        modalProps.onClose();
-                        VencordNative.userPlugins.openFolder();
-                    }}
-                >
-                    I Understand
-                </Button>
-            </ModalFooter>
-        </ModalRoot>
+    openModal(props => (
+        <ConfirmModal
+            {...props}
+            title="Local Plugins"
+            confirmText="I Understand"
+            cancelText="Go Back"
+            variant="warning"
+            onConfirm={() => {
+                Settings.userPluginWarningDismissed = true;
+                VencordNative.userPlugins.openFolder();
+            }}
+        >
+            <>
+                <p>External plugins are not reviewed or tested by Vencord and may break or cause issues.</p>
+                <p>Vencord does not provide support for problems caused by them.</p>
+                <p>Only use plugins you trust.</p>
+            </>
+        </ConfirmModal>
     ));
 }
 
@@ -182,9 +170,15 @@ function PluginSettings() {
 
     useCleanupEffect(() => {
         if (changes.hasChanges)
-            Alerts.show({
-                title: "Restart required",
-                body: (
+            openModal(props => (
+                <ConfirmModal
+                    {...props}
+                    title="Restart required"
+                    confirmText="Restart now"
+                    cancelText="Later!"
+                    variant="primary"
+                    onConfirm={() => location.reload()}
+                >
                     <>
                         <p>The following plugins require a restart:</p>
                         <div>{changes.map((s, i) => (
@@ -194,11 +188,8 @@ function PluginSettings() {
                             </>
                         ))}</div>
                     </>
-                ),
-                confirmText: "Restart now",
-                cancelText: "Later!",
-                onConfirm: () => location.reload()
-            });
+                </ConfirmModal>
+            ));
     }, []);
 
     const depMap = useMemo(() => {
