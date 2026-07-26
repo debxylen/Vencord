@@ -4,8 +4,7 @@
     gap: 2px;
     flex: 1;
     min-width: 0;
-    overflow-x: auto;
-    overflow-y: hidden;
+    overflow: auto hidden;
     scrollbar-width: none;
     -ms-overflow-style: none;
     pointer-events: auto !important;
@@ -24,7 +23,7 @@
 }
 
 .vc-chat-tabs-prefix svg {
-    fill: currentColor !important;
+    fill: currentcolor !important;
 }
 
 .vc-chat-tabs-tab {
@@ -33,7 +32,7 @@
     gap: 6px;
     padding: 6px 11px;
     border-radius: 6px;
-    background: rgba(255, 255, 255, 0.02);
+    background: rgb(255 255 255 / 2%);
     cursor: pointer;
     max-width: 220px;
     min-width: 110px;
@@ -45,11 +44,11 @@
 }
 
 .vc-chat-tabs-tab:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgb(255 255 255 / 5%);
 }
 
 .vc-chat-tabs-active {
-    background: rgba(88, 101, 242, 0.08);
+    background: rgb(88 101 242 / 8%);
 }
 
 .vc-chat-tabs-active::before {
@@ -93,7 +92,7 @@
 }
 
 .vc-chat-tabs-close:hover {
-    background: rgba(244, 67, 54, 0.12);
+    background: rgb(244 67 54 / 12%);
     color: #f44336;
     opacity: 1;
     transform: scale(1.08);
@@ -103,34 +102,28 @@
     opacity: 0.7;
 }
 
-.theme-dark .vc-chat-tabs-tab {
-    background: rgba(0, 0, 0, 0.2);
-}
-
-.theme-dark .vc-chat-tabs-tab:hover {
-    background: rgba(0, 0, 0, 0.3);
-}
-
-.theme-dark .vc-chat-tabs-active {
-    background: rgba(255, 255, 255, 0.08);
-}
-
-.theme-dark .vc-chat-tabs-tab {
-    color: #ffffff;
-}
-
 .theme-light .vc-chat-tabs-tab {
-    background: rgba(0, 0, 0, 0.04);
+    background: rgb(0 0 0 / 4%);
+    color: #2b2d31;
+}
+
+.theme-dark .vc-chat-tabs-tab {
+    background: rgb(0 0 0 / 20%);
+    color: #fff;
 }
 
 .theme-light .vc-chat-tabs-tab:hover {
-    background: rgba(0, 0, 0, 0.06);
+    background: rgb(0 0 0 / 6%);
+}
+
+.theme-dark .vc-chat-tabs-tab:hover {
+    background: rgb(0 0 0 / 30%);
 }
 
 .theme-light .vc-chat-tabs-active {
-    background: rgba(255, 255, 255, 0.4);
+    background: rgb(255 255 255 / 40%);
 }
 
-.theme-light .vc-chat-tabs-tab {
-    color: #2b2d31;
+.theme-dark .vc-chat-tabs-active {
+    background: rgb(255 255 255 / 8%);
 }
