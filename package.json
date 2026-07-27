@@ -1,7 +1,7 @@
 {
     "name": "vencord",
     "private": "true",
-    "version": "1.14.16",
+    "version": "1.15.0",
     "description": "Xylen's Vencord Fork",
     "homepage": "https://github.com/debxylen/Vencord#readme",
     "bugs": {

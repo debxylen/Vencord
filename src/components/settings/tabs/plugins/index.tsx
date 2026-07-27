@@ -37,7 +37,7 @@ import { Logger } from "@utils/Logger";
 import { classes } from "@utils/misc";
 import { useAwaiter, useCleanupEffect } from "@utils/react";
 import { PluginTag, PluginTags } from "@utils/types";
-import { Button, ConfirmModal, lodash, openModal, Parser, React, SearchableSelect, Select, TextInput, Tooltip, useMemo, useState } from "@webpack/common";
+import { Button, ConfirmModal, lodash, openModal, Parser, React, SearchableSelect, Select, TextInput, Tooltip, useMemo, useRef, useState } from "@webpack/common";
 import { JSX } from "react";
 
 import Plugins, { ExcludedPlugins, PluginMeta } from "~plugins";
@@ -182,10 +182,10 @@ function PluginSettings() {
                     <>
                         <p>The following plugins require a restart:</p>
                         <div>{changes.map((s, i) => (
-                            <>
+                            <React.Fragment key={s}>
                                 {i > 0 && ", "}
                                 {Parser.parse("`" + s.split(".")[0] + "`")}
-                            </>
+                            </React.Fragment>
                         ))}</div>
                     </>
                 </ConfirmModal>
