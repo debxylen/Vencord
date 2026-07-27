@@ -18,6 +18,7 @@
 
 import "./styles.css";
 
+import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import * as DataStore from "@api/DataStore";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
@@ -26,7 +27,7 @@ import { classNameFactory } from "@utils/css";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { Channel, Guild } from "@vencord/discord-types";
-import { Avatar, ChannelRouter, ChannelStore, GuildStore, IconUtils, NavigationRouter, React, SelectedChannelStore, UserStore, useStateFromStores } from "@webpack/common";
+import { Avatar, ChannelRouter, ChannelStore, GuildStore, IconUtils, Menu, NavigationRouter, React, SelectedChannelStore, UserStore, useStateFromStores } from "@webpack/common";
 
 const DATASTORE_KEY = "ChatTabs:SavedTabs";
 const cl = classNameFactory("vc-chat-tabs-");
@@ -46,6 +47,8 @@ interface SavedTabState {
 
 const globalTabs: Tab[] = [];
 let globalActiveTabId: string | null = null;
+
+let navguardBypasserId: string | null = null;
 
 const tabListeners = new Set<() => void>();
 function notifyListeners() {
@@ -110,7 +113,8 @@ function removeTab(tabId: string) {
     else if (globalTabs.length === 0)
         toSwitchTo = null;
 
-    switchToTab(toSwitchTo);
+    if (globalActiveTabId === tabId) switchToTab(toSwitchTo);
+    else notifyListeners();
 }
 
 function switchToTab(tab: Tab | null) {
@@ -222,6 +226,9 @@ function TabBar() {
     React.useEffect(() => {
         if (!currentChannel) return;
 
+        if (!settings.store.openTabsOnNavigation && currentChannel.id !== navguardBypasserId) return;
+        navguardBypasserId = null;
+
         let title = currentChannel.name;
         if (!title && currentChannel.isDM()) title = UserStore.getUser(currentChannel.getRecipientId()!)?.username;
 
@@ -259,7 +266,28 @@ function TabBar() {
     );
 }
 
+const patchChannelContextMenu: NavContextMenuPatchCallback = (children, props) => {
+    const channel = props?.channel;
+    if (!channel) return; // ?
+
+    (findGroupChildrenByChildId("mark-channel-read", children) ?? children).push(
+        <Menu.MenuItem
+            id="vc-chat-tabs-open-in-new-tab"
+            label="Open in New Tab"
+            action={() => {
+                navguardBypasserId = channel.id;
+                ChannelRouter.transitionToChannel(channel.id);
+            }}
+        />
+    );
+};
+
 export const settings = definePluginSettings({
+    openTabsOnNavigation: {
+        type: OptionType.BOOLEAN,
+        default: true,
+        description: "Open a new tab whenever you navigate to a channel"
+    },
     persistTabs: {
         type: OptionType.BOOLEAN,
         default: true,
@@ -274,6 +302,13 @@ export default definePlugin({
     tags: ["Organisation"],
 
     settings,
+
+    contextMenus: {
+        "channel-context": patchChannelContextMenu,
+        "thread-context": patchChannelContextMenu,
+        "user-context": patchChannelContextMenu,
+        "gdm-context": patchChannelContextMenu,
+    },
 
     patches: [
         {
