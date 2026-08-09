@@ -22,6 +22,7 @@ import * as IntrnlXxhash64 from "@intrnl/xxhash64";
 import { Logger } from "@utils/Logger";
 import { Plugin } from "@utils/types";
 import * as VapShiki from "@vap/shiki";
+import * as WebpackCmIn from "@webpack/common/internal";
 
 import Plugins, { PluginMeta } from "~plugins";
 import RuntimeUserPluginModules from "~runtime-userplugin-modules";
@@ -34,7 +35,10 @@ type UserPluginEntry = {
 };
 
 const logger = new Logger("LocalPlugins", "#a6d189");
+
+// HACK this was never a good idea
 const ExtraRuntimeUserPluginModules: Record<string, unknown> = {
+    "@webpack/common/internal": WebpackCmIn,
     "@intrnl/xxhash64": IntrnlXxhash64,
     "@vap/shiki": VapShiki,
 };
