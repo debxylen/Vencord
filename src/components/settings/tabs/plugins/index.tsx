@@ -38,7 +38,7 @@ import { classes } from "@utils/misc";
 import { PluginTarget } from "@utils/pluginTargets";
 import { useAwaiter, useCleanupEffect } from "@utils/react";
 import { PluginTag, PluginTags } from "@utils/types";
-import { Button, ConfirmModal, lodash, openModal, Parser, React, SearchableSelect, Select, TextInput, Tooltip, useMemo, useRef, useState } from "@webpack/common";
+import { Button, ConfirmModal, lodash, openModal, Parser, React, SearchableSelect, Select, TextInput, Tooltip, useMemo, useState } from "@webpack/common";
 import { JSX } from "react";
 
 import Plugins, { ExcludedPlugins, PluginMeta } from "~plugins";

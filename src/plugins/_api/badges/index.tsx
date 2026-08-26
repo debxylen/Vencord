@@ -22,8 +22,8 @@ import { _getBadges, BadgePosition, BadgeUserArgs, ProfileBadge } from "@api/Bad
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Heart } from "@components/Heart";
-import { Margins } from "@components/margins";
 import { CopyIcon, LinkIcon } from "@components/Icons";
+import { Margins } from "@components/margins";
 import DonateButton from "@components/settings/DonateButton";
 import { openContributorModal } from "@components/settings/tabs";
 import { Devs } from "@utils/constants";
