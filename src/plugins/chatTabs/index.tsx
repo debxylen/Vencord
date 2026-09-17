@@ -321,7 +321,7 @@ export default definePlugin({
         {
             find: '?"BACK_FORWARD_NAVIGATION":',
             replacement: {
-                match: /(title:)\(0,\i\.jsx\)\(\i,\{\}\)/,
+                match: /(title:\i\?null:)\(0,\i\.jsx\)\(\i,\{\}\)/,
                 replace: "$1$self.renderTitleTabs()"
             }
         }
