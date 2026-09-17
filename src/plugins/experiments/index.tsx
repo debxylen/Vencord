@@ -19,11 +19,11 @@
 import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { ErrorCard } from "@components/ErrorCard";
-import { Margins } from "@components/margins";
 import { Flex } from "@components/Flex";
+import { Margins } from "@components/margins";
 import { Paragraph } from "@components/Paragraph";
 import { Devs, IS_MAC } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { React } from "@webpack/common";
 
