@@ -161,16 +161,11 @@ export const globPlugins = kind => ({
                     const fileName = file.name;
                     if (fileName.startsWith("_") || fileName.startsWith(".")) continue;
                     if (fileName === "index.ts") continue;
-                    if (!file.isDirectory()) continue;
 
-                    const pluginPath = join(fullDir, fileName);
-                    try {
-                        await rmdir(pluginPath);
-                        continue;
-
-                    } catch (error) {
-                        if (error.code === "ENOENT") continue;
-                        if (error.code !== "ENOTEMPTY") throw error;
+                    if (file.isDirectory()) {
+                        const pluginPath = join(fullDir, fileName);
+                        await rmdir(pluginPath).catch(() => { });
+                        if (!await exists(pluginPath)) continue;
                     }
 
                     const target = getPluginTarget(fileName);
