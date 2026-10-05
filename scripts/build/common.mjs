@@ -24,7 +24,7 @@ import "../checkNodeVersion.js";
 import { exec, execSync } from "child_process";
 import esbuild, { build, context } from "esbuild";
 import { constants as FsConstants, readFileSync } from "fs";
-import { access, readdir, readFile } from "fs/promises";
+import { access, readdir, readFile, rmdir } from "fs/promises";
 import { minify as minifyHtml } from "html-minifier-terser";
 import { optimize as optimizeSvg } from 'svgo';
 import { join, relative, resolve } from "path";
@@ -161,6 +161,17 @@ export const globPlugins = kind => ({
                     const fileName = file.name;
                     if (fileName.startsWith("_") || fileName.startsWith(".")) continue;
                     if (fileName === "index.ts") continue;
+                    if (!file.isDirectory()) continue;
+
+                    const pluginPath = join(fullDir, fileName);
+                    try {
+                        await rmdir(pluginPath);
+                        continue;
+
+                    } catch (error) {
+                        if (error.code === "ENOENT") continue;
+                        if (error.code !== "ENOTEMPTY") throw error;
+                    }
 
                     const target = getPluginTarget(fileName);
 
