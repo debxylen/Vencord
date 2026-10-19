@@ -189,11 +189,8 @@ function TabBar() {
             const header = title?.parentElement as HTMLElement;
             if (!title || !header) { rafId = requestAnimationFrame(setupMargins); return; }
 
-            const siblings = [...header.children];
-            const idx = siblings.indexOf(title);
-
-            const leading = siblings[idx - 1] as HTMLElement;
-            const trailing = siblings[idx + 1] as HTMLElement;
+            const leading  = header.querySelector<HTMLElement>(':scope > [class*="leading_"]');
+            const trailing = header.querySelector<HTMLElement>(':scope > [class*="trailing_"]');
             if (!leading || !trailing) { rafId = requestAnimationFrame(setupMargins); return; }
 
             const updateMargins = () => {
