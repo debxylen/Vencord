@@ -25,9 +25,10 @@ import { Card } from "@components/Card";
 import { Divider } from "@components/Divider";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
-import { HeadingTertiary } from "@components/Heading";
+import { Heading, HeadingTertiary } from "@components/Heading";
 import { FolderIcon } from "@components/Icons";
 import { Margins } from "@components/margins";
+
 import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { ChangeList } from "@utils/ChangeList";
@@ -36,9 +37,11 @@ import { isTruthy } from "@utils/guards";
 import { Logger } from "@utils/Logger";
 import { classes } from "@utils/misc";
 import { PluginTarget } from "@utils/pluginTargets";
+import { promptToRestart } from "@utils/promptToRestart";
 import { useAwaiter, useCleanupEffect } from "@utils/react";
 import { PluginTag, PluginTags } from "@utils/types";
-import { Button, ConfirmModal, lodash, openModal, Parser, React, SearchableSelect, Select, TextInput, Tooltip, useMemo, useState } from "@webpack/common";
+import { Button, ConfirmModal, lodash, openModal, Parser, React, SearchableSelect, Select, TextInput, Tooltip, useMemo, useRef, useState } from "@webpack/common";
+
 import { JSX } from "react";
 
 import Plugins, { ExcludedPlugins, PluginMeta } from "~plugins";
@@ -173,26 +176,12 @@ function PluginSettings() {
 
     useCleanupEffect(() => {
         if (changes.hasChanges)
-            openModal(props => (
-                <ConfirmModal
-                    {...props}
-                    title="Restart required"
-                    confirmText="Restart now"
-                    cancelText="Later!"
-                    variant="primary"
-                    onConfirm={() => location.reload()}
-                >
-                    <>
-                        <p>The following plugins require a restart:</p>
-                        <div>{changes.map((s, i) => (
-                            <React.Fragment key={s}>
-                                {i > 0 && ", "}
-                                {Parser.parse("`" + s.split(".")[0] + "`")}
-                            </React.Fragment>
-                        ))}</div>
-                    </>
-                </ConfirmModal>
-            ));
+            promptToRestart("reload", {
+                children: <>
+                    <Heading tag="h5">The following plugins require a restart:</Heading>
+                    <Paragraph>{Array.from(changes, k => k.split(".")[0]).join(", ")}</Paragraph>
+                </>
+            });
     }, []);
 
     const depMap = useMemo(() => {
