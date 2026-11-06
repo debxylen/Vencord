@@ -16,24 +16,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import "./updater";
 import "./ipcPlugins";
 import "./settings";
-
-import { debounce } from "@shared/debounce";
-import { IpcEvents } from "@shared/IpcEvents";
-import { BrowserWindow, ipcMain, nativeTheme, shell, systemPreferences } from "electron";
-import monacoHtml from "file://monacoWin.html?minify&base64";
-import { Dirent, existsSync, FSWatcher, mkdirSync, readdirSync, readFileSync, statSync, watch, writeFileSync } from "fs";
-import { open, readdir, readFile } from "fs/promises";
-import { release } from "os";
-import { join } from "path";
-
+import "./updater";
 import { registerCspIpcHandlers } from "./csp/manager";
-import { getThemeInfo, stripBOM, UserThemeHeader } from "./themes";
+import { UserThemeHeader, getThemeInfo, stripBOM } from "./themes";
 import { ALLOWED_PROTOCOLS, QUICK_CSS_PATH, SETTINGS_DIR, THEMES_DIR, USERPLUGINS_DIR } from "./utils/constants";
 import { ensureSafePath } from "./utils/ensureSafePath";
 import { makeLinksOpenExternally } from "./utils/externalLinks";
+import { IpcEvents } from "@shared/IpcEvents";
+import { debounce } from "@shared/debounce";
+import { BrowserWindow, ipcMain, nativeTheme, shell, systemPreferences } from "electron";
+import { Dirent, FSWatcher, existsSync, mkdirSync, readFileSync, readdirSync, statSync, watch, writeFileSync } from "fs";
+import { open, readFile, readdir } from "fs/promises";
+import { release } from "os";
+import { join } from "path";
+
 
 const RENDERER_CSS_PATH = join(__dirname, IS_VESKTOP ? "vencordDesktopRenderer.css" : "renderer.css");
 
@@ -229,7 +227,7 @@ ipcMain.handle(IpcEvents.OPEN_MONACO_EDITOR, async () => {
 
     makeLinksOpenExternally(win);
 
-    await win.loadURL(`data:text/html;base64,${monacoHtml}`);
+    await win.loadURL(DESKTOP_MONACO_EDITOR_URL);
 });
 
 ipcMain.handle(IpcEvents.GET_RENDERER_CSS, () => readFile(RENDERER_CSS_PATH, "utf-8"));

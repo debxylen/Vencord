@@ -20,7 +20,7 @@ import { SettingsStore as SettingsStoreClass } from "@shared/SettingsStore";
 import { Logger } from "@utils/Logger";
 import { mergeDefaults } from "@utils/mergeDefaults";
 import { DefinedSettings, OptionType, SettingsChecks, SettingsDefinition } from "@utils/types";
-import { React, useEffect } from "@webpack/common";
+import { useEffect, useReducer } from "@webpack/common";
 
 import plugins from "~plugins";
 
@@ -205,7 +205,7 @@ export const Settings = SettingsStore.store;
  * @returns Settings
  */
 export function useSettings(paths?: UseSettings<Settings>[]) {
-    const [, forceUpdate] = React.useReducer(() => ({}), {});
+    const [, forceUpdate] = useReducer(() => ({}), {});
 
     useEffect(() => {
         if (paths) {

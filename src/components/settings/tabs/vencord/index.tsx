@@ -16,11 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { DonateButtonComponent, isDonor } from "./DonateButton";
+import { MacOSVibrancySettings } from "./MacVibrancySettings";
+import { NotificationSection } from "./NotificationSettings";
+import { WindowsMaterialSettings } from "./WindowsMaterialSettings";
 import { openNotificationLogModal } from "@api/Notifications/notificationLog";
 import { useSettings } from "@api/Settings";
 import { Divider } from "@components/Divider";
 import { FormSwitch } from "@components/FormSwitch";
+import { Heading } from "@components/Heading";
 import { FolderIcon, GithubIcon, LogIcon, PaintbrushIcon, RestartIcon } from "@components/Icons";
+import { Paragraph } from "@components/Paragraph";
 import { Margins } from "@components/margins";
 import { QuickAction, QuickActionCard } from "@components/settings/QuickAction";
 import { SpecialCard } from "@components/settings/SpecialCard";
@@ -34,12 +40,8 @@ import { IS_WINDOWS } from "@utils/constants";
 import { isPluginDev } from "@utils/misc";
 import { relaunch } from "@utils/native";
 import { promptToRestart } from "@utils/promptToRestart";
-import { Forms, React, useMemo, UserStore } from "@webpack/common";
+import { React, UserStore, useMemo } from "@webpack/common";
 
-import { DonateButtonComponent, isDonor } from "./DonateButton";
-import { MacOSVibrancySettings } from "./MacVibrancySettings";
-import { NotificationSection } from "./NotificationSettings";
-import { WindowsMaterialSettings } from "./WindowsMaterialSettings";
 
 const DEFAULT_DONATE_IMAGE = "https://cdn.discordapp.com/emojis/1026533090627174460.png";
 const SHIGGY_DONATE_IMAGE = "https://media.discordapp.net/stickers/1039992459209490513.png";
@@ -187,7 +189,7 @@ function VencordSettings() {
             )}
 
             <section>
-                <Forms.FormTitle tag="h5">Quick Actions</Forms.FormTitle>
+                <Heading className={Margins.bottom8}>Quick Actions</Heading>
 
                 <QuickActionCard>
                     <QuickAction
@@ -225,13 +227,13 @@ function VencordSettings() {
             <Divider />
 
             <section className={Margins.top16}>
-                <Forms.FormTitle tag="h5">Settings</Forms.FormTitle>
-                <Forms.FormText className={Margins.bottom20} style={{ color: "var(--text-muted)" }}>
+                <Heading className={Margins.bottom8}>Settings</Heading>
+                <Paragraph className={Margins.bottom20} style={{ color: "var(--text-muted)" }}>
                     Hint: You can change the position of this settings section in the{" "}
                     <a onClick={() => openPluginModal(SettingsPlugin)}>
                         settings of the Settings plugin
                     </a>!
-                </Forms.FormText>
+                </Paragraph>
 
                 <div className="vc-settings-switches">
                     <Switches />

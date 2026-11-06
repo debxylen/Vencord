@@ -19,7 +19,6 @@
 import { useSettings } from "@api/Settings";
 import { authorizeCloud, deauthorizeCloud } from "@api/SettingsSync/cloudSetup";
 import { deleteCloudSettings, eraseAllCloudData, getCloudSettings, getCloudSyncDirection, putCloudSettings, setCloudSyncDirection } from "@api/SettingsSync/cloudSync";
-import { BaseText } from "@components/BaseText";
 import { Button, ButtonProps } from "@components/Button";
 import { CheckedTextInput } from "@components/CheckedTextInput";
 import { Divider } from "@components/Divider";
@@ -29,12 +28,14 @@ import { Grid } from "@components/Grid";
 import { Heading } from "@components/Heading";
 import { CloudDownloadIcon, CloudUploadIcon, DeleteIcon, RestartIcon } from "@components/Icons";
 import { Link } from "@components/Link";
-import { Margins } from "@components/margins";
 import { Paragraph } from "@components/Paragraph";
+import { Margins } from "@components/margins";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
+import { confirmAction } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { IconComponent } from "@utils/types";
-import { ConfirmModal,openModal, Select, Tooltip, useState } from "@webpack/common";
+import { Select, Tooltip, useState } from "@webpack/common";
+
 
 function validateUrl(url: string) {
     try {
@@ -46,14 +47,9 @@ function validateUrl(url: string) {
 }
 
 const SectionHeading = ({ text }: { text: string; }) => (
-    <BaseText
-        tag="h5"
-        size="lg"
-        weight="semibold"
-        className={Margins.bottom16}
-    >
+    <Heading tag="h3" className={Margins.bottom16}>
         {text}
-    </BaseText>
+    </Heading>
 );
 
 function ButtonWithIcon({ children, Icon, className, ...buttonProps }: ButtonProps & { Icon: IconComponent; }) {
@@ -90,7 +86,7 @@ function CloudSetupSection() {
                         cloud.authenticated = v;
                 }}
             />
-            <Heading tag="h5" className={Margins.top16}>Backend URL</Heading>
+            <Heading className={classes(Margins.top16, Margins.bottom8)}>Backend URL</Heading>
             <Paragraph className={Margins.bottom8}>
                 Which backend to use when using cloud integrations.
             </Paragraph>
@@ -143,7 +139,7 @@ function SettingsSyncSection() {
                 />
 
                 <div>
-                    <Heading tag="h5">
+                    <Heading className={Margins.bottom8}>
                         Sync Rules for This Device
                     </Heading>
                     <Paragraph className={Margins.bottom8}>
@@ -228,16 +224,15 @@ function ResetSection() {
                 <ButtonWithIcon
                     variant="dangerPrimary"
                     disabled={!authenticated}
-                    onClick={() => openModal(props => (
-                        <ConfirmModal
-                            {...props}
-                            title="Are you sure?"
-                            subtitle="Once your data is erased, we cannot recover it. There's no going back!"
-                            onConfirm={eraseAllCloudData}
-                            confirmText="Erase it!"
-                            cancelText="Nevermind"
-                        />
-                    ))}
+                    onClick={() =>
+                        confirmAction({
+                            title: "Are you sure?",
+                            subtitle: "Once your data is erased, we cannot recover it. There's no going back!",
+                            confirmText: "Erase it!",
+                            cancelText: "Nevermind",
+                            onConfirm: eraseAllCloudData,
+                        })
+                    }
                     Icon={DeleteIcon}
                 >
                     Delete your Cloud Account

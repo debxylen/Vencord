@@ -16,22 +16,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { FullPatchInput } from "./FullPatchInput";
+import { PatchPreview } from "./PatchPreview";
+import { ReplacementInput } from "./ReplacementInput";
+import { Button } from "@components/Button";
 import { CodeBlock } from "@components/CodeBlock";
 import { Divider } from "@components/Divider";
 import { Flex } from "@components/Flex";
-import { HeadingTertiary } from "@components/Heading";
+import { Heading, HeadingTertiary } from "@components/Heading";
 import { Margins } from "@components/margins";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { debounce } from "@shared/debounce";
 import { copyWithToast } from "@utils/discord";
+import { classes } from "@utils/misc";
 import { stripIndent } from "@utils/text";
 import { ReplaceFn } from "@utils/types";
 import { search } from "@webpack";
-import { Button, React, TextInput, useMemo, useState } from "@webpack/common";
+import { React, TextInput, useMemo, useState } from "@webpack/common";
 
-import { FullPatchInput } from "./FullPatchInput";
-import { PatchPreview } from "./PatchPreview";
-import { ReplacementInput } from "./ReplacementInput";
 
 const findCandidates = debounce(function ({ find, setModule, setError }) {
     const candidates = search(find);
@@ -105,7 +107,7 @@ function PatchHelper() {
 
     return (
         <SettingsTab>
-            <HeadingTertiary>Full patch</HeadingTertiary>
+            <Heading className={Margins.bottom8}>Full patch</Heading>
             <FullPatchInput
                 setFind={onFindChange}
                 setParsedFind={setParsedFind}
@@ -113,7 +115,7 @@ function PatchHelper() {
                 setReplacement={setReplacement}
             />
 
-            <HeadingTertiary className={Margins.top8}>Find</HeadingTertiary>
+            <Heading className={classes(Margins.top8, Margins.bottom8)}>Find</Heading>
             <TextInput
                 type="text"
                 value={find}
@@ -121,7 +123,7 @@ function PatchHelper() {
                 error={findError}
             />
 
-            <HeadingTertiary className={Margins.top8}>Match</HeadingTertiary>
+            <Heading className={classes(Margins.top8, Margins.bottom8)}>Match</Heading>
             <TextInput
                 type="text"
                 value={match}
@@ -148,7 +150,7 @@ function PatchHelper() {
 
             {!!(find && match && replacement) && (
                 <>
-                    <HeadingTertiary className={Margins.top20}>Code</HeadingTertiary>
+                    <Heading className={classes(Margins.top20, Margins.bottom8)}>Code</Heading>
                     <CodeBlock lang="js" content={code} />
                     <Flex className={Margins.top16}>
                         <Button onClick={() => copyWithToast(code)}>

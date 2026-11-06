@@ -17,37 +17,34 @@
 */
 
 import "./styles.css";
-
+import { PluginCard } from "./PluginCard";
+import { UIElementsButton } from "./UIElements";
 import * as DataStore from "@api/DataStore";
 import { isPluginEnabled } from "@api/PluginManager";
 import { Settings, useSettings } from "@api/Settings";
+import { Button } from "@components/Button";
 import { Card } from "@components/Card";
 import { Divider } from "@components/Divider";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Heading, HeadingTertiary } from "@components/Heading";
 import { FolderIcon } from "@components/Icons";
-import { Margins } from "@components/margins";
-
 import { Paragraph } from "@components/Paragraph";
+import { Margins } from "@components/margins";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { ChangeList } from "@utils/ChangeList";
+import { Logger } from "@utils/Logger";
 import { classNameFactory } from "@utils/css";
 import { isTruthy } from "@utils/guards";
-import { Logger } from "@utils/Logger";
 import { classes } from "@utils/misc";
 import { PluginTarget } from "@utils/pluginTargets";
 import { promptToRestart } from "@utils/promptToRestart";
 import { useAwaiter, useCleanupEffect } from "@utils/react";
 import { PluginTag, PluginTags } from "@utils/types";
-import { Button, ConfirmModal, lodash, openModal, Parser, React, SearchableSelect, Select, TextInput, Tooltip, useMemo, useRef, useState } from "@webpack/common";
-
+import { ConfirmModal, Parser, React, SearchableSelect, Select, TextInput, Tooltip, lodash, openModal, useMemo, useRef, useState } from "@webpack/common";
 import { JSX } from "react";
-
 import Plugins, { ExcludedPlugins, PluginMeta } from "~plugins";
 
-import { PluginCard } from "./PluginCard";
-import { UIElementsButton } from "./UIElements";
 
 export const cl = classNameFactory("vc-plugins-");
 export const logger = new Logger("PluginSettings", "#a6d189");
@@ -85,7 +82,7 @@ function ReloadRequiredCard({ required }: { required: boolean; }) {
             {required
                 ? (
                     <>
-                        <HeadingTertiary>Restart required!</HeadingTertiary>
+                        <Heading tag="h4">Restart required!</Heading>
                         <Paragraph className={cl("dep-text")}>
                             Restart now to apply new plugins and their settings
                         </Paragraph>
@@ -95,9 +92,9 @@ function ReloadRequiredCard({ required }: { required: boolean; }) {
                     </>
                 )
                 : (
-                    <Flex style={{ justifyContent: "space-between", alignItems: "center", height: "100%" }}>
+<Flex style={{ justifyContent: "space-between", alignItems: "center", height: "100%" }}>
                         <div>
-                            <HeadingTertiary>Plugin Management</HeadingTertiary>
+                            <Heading tag="h4">Plugin Management</Heading>
                             <Paragraph>Press the cog wheel or info icon to get more info on a plugin</Paragraph>
                             <Paragraph>Plugins with a cog wheel have settings you can modify!</Paragraph>
                         </div>
@@ -178,7 +175,7 @@ function PluginSettings() {
         if (changes.hasChanges)
             promptToRestart("reload", {
                 children: <>
-                    <Heading tag="h5">The following plugins require a restart:</Heading>
+                    <Heading className={Margins.bottom8}>The following plugins require a restart:</Heading>
                     <Paragraph>{Array.from(changes, k => k.split(".")[0]).join(", ")}</Paragraph>
                 </>
             });
@@ -314,9 +311,9 @@ function PluginSettings() {
 
             <UIElementsButton />
 
-            <HeadingTertiary className={classes(Margins.top20, Margins.bottom8)}>
+            <Heading tag="h4" className={classes(Margins.top20, Margins.bottom8)}>
                 Filters
-            </HeadingTertiary>
+            </Heading>
 
             <ErrorBoundary noop>
                 <TextInput
@@ -357,7 +354,7 @@ function PluginSettings() {
                 </div>
             </ErrorBoundary>
 
-            <HeadingTertiary className={Margins.top20}>Plugins</HeadingTertiary>
+            <Heading tag="h4" className={Margins.top20}>Plugins</Heading>
 
             {plugins.length || requiredPlugins.length
                 ? (
@@ -374,9 +371,9 @@ function PluginSettings() {
 
             <Divider className={Margins.top20} />
 
-            <HeadingTertiary className={classes(Margins.top20, Margins.bottom8)}>
+            <Heading tag="h4" className={classes(Margins.top20, Margins.bottom8)}>
                 Required Plugins
-            </HeadingTertiary>
+            </Heading>
 
             <div className={cl("grid")}>
                 {requiredPlugins.length
