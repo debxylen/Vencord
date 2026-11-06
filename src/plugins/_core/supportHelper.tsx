@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import SettingsPlugin from "./settings";
 import { isPluginEnabled } from "@api/PluginManager";
 import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
@@ -25,12 +24,12 @@ import { Card } from "@components/Card";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
-import { Paragraph } from "@components/Paragraph";
 import { Margins } from "@components/margins";
-import { UpdaterTab, openSettingsTabModal } from "@components/settings";
-import { Logger } from "@utils/Logger";
-import { CONTRIB_ROLE_ID, DONOR_ROLE_ID, Devs, KNOWN_ISSUES_CHANNEL_ID, REGULAR_ROLE_ID, SUPPORT_CATEGORY_ID, SUPPORT_CHANNEL_ID, VENBOT_USER_ID, VENCORD_GUILD_ID } from "@utils/constants";
+import { Paragraph } from "@components/Paragraph";
+import { openSettingsTabModal,UpdaterTab } from "@components/settings";
+import { CONTRIB_ROLE_ID, Devs, DONOR_ROLE_ID, KNOWN_ISSUES_CHANNEL_ID, REGULAR_ROLE_ID, SUPPORT_CATEGORY_ID, SUPPORT_CHANNEL_ID, VENBOT_USER_ID, VENCORD_GUILD_ID } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
+import { Logger } from "@utils/Logger";
 import { isPluginDev, tryOrElse } from "@utils/misc";
 import { relaunch } from "@utils/native";
 import { onlyOnce } from "@utils/onlyOnce";
@@ -38,10 +37,13 @@ import { makeCodeblock } from "@utils/text";
 import definePlugin from "@utils/types";
 import { checkForUpdates, isOutdated, update } from "@utils/updater";
 import { Channel, RenderModalProps } from "@vencord/discord-types";
-import { ChannelStore, ConfirmModal, GuildMemberStore, Parser, PermissionStore, PermissionsBits, RelationshipStore, UserStore, openModal, showToast } from "@webpack/common";
+import { ChannelStore, ConfirmModal, GuildMemberStore, openModal, Parser, PermissionsBits, PermissionStore, RelationshipStore, showToast,UserStore } from "@webpack/common";
 import { JSX } from "react";
+
 import gitHash from "~git-hash";
 import plugins, { PluginMeta } from "~plugins";
+
+import SettingsPlugin from "./settings";
 
 
 const AdditionalAllowedChannelIds = [

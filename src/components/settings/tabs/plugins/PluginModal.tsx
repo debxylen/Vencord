@@ -17,16 +17,14 @@
 */
 
 import "./PluginModal.css";
-import { openContributorModal } from "./ContributorModal";
-import { FavoriteButton, GithubButton, WebsiteButton } from "./PluginModalButtons";
-import { OptionComponentMap } from "./components";
+
 import { generateId } from "@api/Commands";
 import { hasAnyVisibleSettings, isSettingHidden } from "@api/PluginManager";
 import { useSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Heading } from "@components/Heading";
-import { Paragraph } from "@components/Paragraph";
 import { Margins } from "@components/margins";
+import { Paragraph } from "@components/Paragraph";
 import { debounce } from "@shared/debounce";
 import { gitRemote } from "@shared/vencordUserAgent";
 import { classNameFactory } from "@utils/css";
@@ -35,9 +33,14 @@ import { classes } from "@utils/misc";
 import { OptionType, Plugin, PluginTag } from "@utils/types";
 import { RenderModalProps, User } from "@vencord/discord-types";
 import { findCssClassesLazy } from "@webpack";
-import { Clickable, FluxDispatcher, Modal, React, Tooltip, UserStore, UserSummaryItem, UserUtils, openModal, useEffect, useMemo, useState } from "@webpack/common";
+import { Clickable, FluxDispatcher, Modal, openModal, React, Tooltip, useEffect, useMemo, UserStore, UserSummaryItem, UserUtils, useState } from "@webpack/common";
 import { Constructor } from "type-fest";
+
 import { PluginMeta } from "~plugins";
+
+import { OptionComponentMap } from "./components";
+import { openContributorModal } from "./ContributorModal";
+import { FavoriteButton, GithubButton, WebsiteButton } from "./PluginModalButtons";
 
 
 const cl = classNameFactory("vc-plugin-modal-");

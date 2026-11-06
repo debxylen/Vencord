@@ -119,7 +119,7 @@ function VencordPhaseSection() {
 
     return (
         <section>
-            <Forms.FormTitle tag="h2">Vencord Startup Phases</Forms.FormTitle>
+            <Heading tag="h2" className={Margins.bottom8}>Vencord Startup Phases</Heading>
             <code>
                 <div style={{ color: "var(--text-strong)", display: "grid", gridTemplateColumns: "auto auto 1fr", gap: "2px 10px", userSelect: "text" }}>
                     <span>Start</span>
@@ -144,7 +144,7 @@ function SlowPluginsSection() {
 
     return (
         <section>
-            <Forms.FormTitle tag="h2">Slowest Plugin Starts</Forms.FormTitle>
+            <Heading tag="h2" className={Margins.bottom8}>Slowest Plugin Starts</Heading>
             <code>
                 <div style={{ color: "var(--text-strong)", display: "grid", gridTemplateColumns: "auto auto auto 1fr", gap: "2px 10px", userSelect: "text" }}>
                     <span>Start</span>
@@ -171,7 +171,7 @@ function PatchBootstrapSection() {
 
     return (
         <section>
-            <Forms.FormTitle tag="h2">Patch Bootstrap</Forms.FormTitle>
+            <Heading tag="h2" className={Margins.bottom8}>Patch Bootstrap</Heading>
             <code>
                 <div style={{ color: "var(--text-strong)", display: "grid", gridTemplateColumns: "auto auto auto 1fr", gap: "2px 10px", userSelect: "text" }}>
                     <span>Start</span>
@@ -198,7 +198,7 @@ function PatchedModulesSection() {
 
     return (
         <section>
-            <Forms.FormTitle tag="h2">Slowest Patched Modules</Forms.FormTitle>
+            <Heading tag="h2" className={Margins.bottom8}>Slowest Patched Modules</Heading>
             <code>
                 <div style={{ color: "var(--text-strong)", display: "grid", gridTemplateColumns: "auto auto auto 1fr", gap: "2px 10px", userSelect: "text" }}>
                     <span>Start</span>

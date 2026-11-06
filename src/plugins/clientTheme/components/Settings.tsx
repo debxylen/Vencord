@@ -4,17 +4,18 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { settings } from "..";
 import { Button } from "@components/Button";
 import { ErrorCard } from "@components/ErrorCard";
 import { Heading } from "@components/Heading";
-import { Paragraph } from "@components/Paragraph";
 import { Margins } from "@components/margins";
+import { Paragraph } from "@components/Paragraph";
 import { relativeLuminance } from "@plugins/clientTheme/utils/colorUtils";
 import { createOrUpdateThemeColorVars } from "@plugins/clientTheme/utils/styleUtils";
 import { classNameFactory } from "@utils/css";
 import { findByCodeLazy, findStoreLazy } from "@webpack";
 import { ColorPicker, ThemeStore, useStateFromStores } from "@webpack/common";
+
+import { settings } from "..";
 
 
 const saveClientTheme = findByCodeLazy('type:"UNSYNCED_USER_SETTINGS_UPDATE', '"system"===');

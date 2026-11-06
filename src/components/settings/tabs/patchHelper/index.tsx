@@ -16,14 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { FullPatchInput } from "./FullPatchInput";
-import { PatchPreview } from "./PatchPreview";
-import { ReplacementInput } from "./ReplacementInput";
 import { Button } from "@components/Button";
 import { CodeBlock } from "@components/CodeBlock";
 import { Divider } from "@components/Divider";
 import { Flex } from "@components/Flex";
-import { Heading, HeadingTertiary } from "@components/Heading";
+import { Heading } from "@components/Heading";
 import { Margins } from "@components/margins";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { debounce } from "@shared/debounce";
@@ -33,6 +30,10 @@ import { stripIndent } from "@utils/text";
 import { ReplaceFn } from "@utils/types";
 import { search } from "@webpack";
 import { React, TextInput, useMemo, useState } from "@webpack/common";
+
+import { FullPatchInput } from "./FullPatchInput";
+import { PatchPreview } from "./PatchPreview";
+import { ReplacementInput } from "./ReplacementInput";
 
 
 const findCandidates = debounce(function ({ find, setModule, setError }) {

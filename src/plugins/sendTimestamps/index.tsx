@@ -17,17 +17,18 @@
 */
 
 import "./styles.css";
+
 import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { definePluginSettings } from "@api/Settings";
 import { Heading } from "@components/Heading";
-import { Paragraph } from "@components/Paragraph";
 import { Margins } from "@components/margins";
+import { Paragraph } from "@components/Paragraph";
 import { Devs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
-import { Theme, getTheme, insertTextIntoChatInputBox } from "@utils/discord";
+import { getTheme, insertTextIntoChatInputBox,Theme } from "@utils/discord";
 import definePlugin, { IconComponent, OptionType } from "@utils/types";
 import { RenderModalProps } from "@vencord/discord-types";
-import { Forms, Modal, Parser, Select, openModal, useMemo, useState } from "@webpack/common";
+import { Modal, openModal, Parser, Select, useMemo, useState } from "@webpack/common";
 
 
 const settings = definePluginSettings({

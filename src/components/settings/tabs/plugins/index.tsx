@@ -17,8 +17,7 @@
 */
 
 import "./styles.css";
-import { PluginCard } from "./PluginCard";
-import { UIElementsButton } from "./UIElements";
+
 import * as DataStore from "@api/DataStore";
 import { isPluginEnabled } from "@api/PluginManager";
 import { Settings, useSettings } from "@api/Settings";
@@ -27,23 +26,27 @@ import { Card } from "@components/Card";
 import { Divider } from "@components/Divider";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
-import { Heading, HeadingTertiary } from "@components/Heading";
+import { Heading } from "@components/Heading";
 import { FolderIcon } from "@components/Icons";
-import { Paragraph } from "@components/Paragraph";
 import { Margins } from "@components/margins";
+import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { ChangeList } from "@utils/ChangeList";
-import { Logger } from "@utils/Logger";
 import { classNameFactory } from "@utils/css";
 import { isTruthy } from "@utils/guards";
+import { Logger } from "@utils/Logger";
 import { classes } from "@utils/misc";
 import { PluginTarget } from "@utils/pluginTargets";
 import { promptToRestart } from "@utils/promptToRestart";
 import { useAwaiter, useCleanupEffect } from "@utils/react";
 import { PluginTag, PluginTags } from "@utils/types";
-import { ConfirmModal, Parser, React, SearchableSelect, Select, TextInput, Tooltip, lodash, openModal, useMemo, useRef, useState } from "@webpack/common";
+import { ConfirmModal, lodash, openModal, React, SearchableSelect, Select, TextInput, Tooltip, useMemo, useState } from "@webpack/common";
 import { JSX } from "react";
+
 import Plugins, { ExcludedPlugins, PluginMeta } from "~plugins";
+
+import { PluginCard } from "./PluginCard";
+import { UIElementsButton } from "./UIElements";
 
 
 export const cl = classNameFactory("vc-plugins-");

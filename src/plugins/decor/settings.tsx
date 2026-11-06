@@ -4,15 +4,16 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import DecorPlugin from ".";
-import DecorSection from "./ui/components/DecorSection";
 import { definePluginSettings } from "@api/Settings";
 import { TextButton } from "@components/Button";
-import { Paragraph } from "@components/Paragraph";
 import { Margins } from "@components/margins";
+import { Paragraph } from "@components/Paragraph";
 import { classes } from "@utils/misc";
 import { OptionType } from "@utils/types";
 import { SettingsRouter } from "@webpack/common";
+
+import DecorPlugin from ".";
+import DecorSection from "./ui/components/DecorSection";
 
 
 export const settings = definePluginSettings({

@@ -6,8 +6,8 @@
 
 import { Button } from "@components/Button";
 import { Heading } from "@components/Heading";
-import { Paragraph } from "@components/Paragraph";
 import { Margins } from "@components/margins";
+import { Paragraph } from "@components/Paragraph";
 import { canonicalizeMatch, canonicalizeReplace } from "@utils/patches";
 import { makeCodeblock } from "@utils/text";
 import { ReplaceFn } from "@utils/types";

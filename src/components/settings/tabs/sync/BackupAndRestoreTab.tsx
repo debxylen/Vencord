@@ -21,10 +21,10 @@ import { Button } from "@components/Button";
 import { Card } from "@components/Card";
 import { Flex } from "@components/Flex";
 import { Heading } from "@components/Heading";
-import { Paragraph } from "@components/Paragraph";
-import { Text } from "@components/Text";
 import { Margins } from "@components/margins";
+import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
+import { Text } from "@components/Text";
 
 
 function BackupAndRestoreTab() {

@@ -16,19 +16,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { getCurrentVoice, settings } from "./settings";
 import { Button } from "@components/Button";
 import { ErrorCard } from "@components/ErrorCard";
 import { Heading } from "@components/Heading";
-import { Paragraph } from "@components/Paragraph";
 import { Margins } from "@components/margins";
-import { Logger } from "@utils/Logger";
+import { Paragraph } from "@components/Paragraph";
 import { Devs, IS_LINUX } from "@utils/constants";
+import { Logger } from "@utils/Logger";
 import { classes } from "@utils/misc";
 import { wordsToTitle } from "@utils/text";
 import definePlugin, { ReporterTestable } from "@utils/types";
-import { AuthenticationStore, ChannelStore, GuildMemberStore, SelectedChannelStore, SelectedGuildStore, UserStore, VoiceStateStore, useMemo } from "@webpack/common";
+import { AuthenticationStore, ChannelStore, GuildMemberStore, SelectedChannelStore, SelectedGuildStore, useMemo,UserStore, VoiceStateStore } from "@webpack/common";
 import { ReactElement } from "react";
+
+import { getCurrentVoice, settings } from "./settings";
 
 
 interface VoiceStateChangeEvent {

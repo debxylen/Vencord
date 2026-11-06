@@ -16,14 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { settings } from "./settings";
-import { getLanguages } from "./utils";
 import { Divider } from "@components/Divider";
 import { FormSwitch } from "@components/FormSwitch";
 import { Heading } from "@components/Heading";
 import { Margins } from "@components/margins";
 import { RenderModalProps } from "@vencord/discord-types";
-import { Forms, Modal, SearchableSelect, openModal, useMemo } from "@webpack/common";
+import { Modal, openModal, SearchableSelect, useMemo } from "@webpack/common";
+
+import { settings } from "./settings";
+import { getLanguages } from "./utils";
 
 
 const LanguageSettingKeys = ["receivedInput", "receivedOutput", "sentInput", "sentOutput"] as const;

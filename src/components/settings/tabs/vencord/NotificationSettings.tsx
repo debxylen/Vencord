@@ -10,10 +10,10 @@ import { Button } from "@components/Button";
 import { ErrorCard } from "@components/ErrorCard";
 import { Flex } from "@components/Flex";
 import { Heading } from "@components/Heading";
-import { Paragraph } from "@components/Paragraph";
 import { Margins } from "@components/margins";
+import { Paragraph } from "@components/Paragraph";
 import { identity } from "@utils/misc";
-import { Modal, Select, Slider, openModal } from "@webpack/common";
+import { Modal, openModal,Select, Slider } from "@webpack/common";
 
 
 export function NotificationSection() {

@@ -19,18 +19,20 @@
 import "./ipcPlugins";
 import "./settings";
 import "./updater";
+
+import { debounce } from "@shared/debounce";
+import { IpcEvents } from "@shared/IpcEvents";
+import { BrowserWindow, ipcMain, nativeTheme, shell, systemPreferences } from "electron";
+import { Dirent, existsSync, FSWatcher, mkdirSync, readdirSync, readFileSync, statSync, watch, writeFileSync } from "fs";
+import { open, readdir,readFile } from "fs/promises";
+import { release } from "os";
+import { join } from "path";
+
 import { registerCspIpcHandlers } from "./csp/manager";
-import { UserThemeHeader, getThemeInfo, stripBOM } from "./themes";
+import { getThemeInfo, stripBOM,UserThemeHeader } from "./themes";
 import { ALLOWED_PROTOCOLS, QUICK_CSS_PATH, SETTINGS_DIR, THEMES_DIR, USERPLUGINS_DIR } from "./utils/constants";
 import { ensureSafePath } from "./utils/ensureSafePath";
 import { makeLinksOpenExternally } from "./utils/externalLinks";
-import { IpcEvents } from "@shared/IpcEvents";
-import { debounce } from "@shared/debounce";
-import { BrowserWindow, ipcMain, nativeTheme, shell, systemPreferences } from "electron";
-import { Dirent, FSWatcher, existsSync, mkdirSync, readFileSync, readdirSync, statSync, watch, writeFileSync } from "fs";
-import { open, readFile, readdir } from "fs/promises";
-import { release } from "os";
-import { join } from "path";
 
 
 const RENDERER_CSS_PATH = join(__dirname, IS_VESKTOP ? "vencordDesktopRenderer.css" : "renderer.css");

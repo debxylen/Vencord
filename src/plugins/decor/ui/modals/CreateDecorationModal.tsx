@@ -8,16 +8,16 @@ import { Card } from "@components/Card";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Heading } from "@components/Heading";
 import { Link } from "@components/Link";
-import { Paragraph } from "@components/Paragraph";
 import { Margins } from "@components/margins";
+import { Paragraph } from "@components/Paragraph";
 import { GUILD_ID, INVITE_KEY, RAW_SKU_ID } from "@plugins/decor/lib/constants";
 import { useCurrentUserDecorationsStore } from "@plugins/decor/lib/stores/CurrentUserDecorationsStore";
-import { DecorationModalClasses, cl, requireAvatarDecorationModal, requireCreateStickerModal } from "@plugins/decor/ui";
+import { cl, DecorationModalClasses, requireAvatarDecorationModal, requireCreateStickerModal } from "@plugins/decor/ui";
 import { AvatarDecorationModalPreview } from "@plugins/decor/ui/components";
 import { openInviteModal } from "@utils/discord";
 import { RenderModalProps } from "@vencord/discord-types";
 import { findComponentByCodeLazy } from "@webpack";
-import { FluxDispatcher, GuildStore, Modal, NavigationRouter, TextInput, UserStore, closeAllModals, openModal, useEffect, useMemo, useState } from "@webpack/common";
+import { closeAllModals, FluxDispatcher, GuildStore, Modal, NavigationRouter, openModal, TextInput, useEffect, useMemo, UserStore, useState } from "@webpack/common";
 
 
 const FileUpload = findComponentByCodeLazy(".currentTarget.files", "lineClamp:1");

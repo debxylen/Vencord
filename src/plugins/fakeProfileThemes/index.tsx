@@ -18,14 +18,15 @@
 
 // This plugin is a port from Alyxia's Vendetta plugin
 import "./styles.css";
+
 import { definePluginSettings } from "@api/Settings";
 import { Button } from "@components/Button";
 import { Divider } from "@components/Divider";
 import { Flex } from "@components/Flex";
 import { Heading } from "@components/Heading";
+import { Margins } from "@components/margins";
 import { Paragraph } from "@components/Paragraph";
 import { Text } from "@components/Text";
-import { Margins } from "@components/margins";
 import { Devs } from "@utils/constants";
 import { copyWithToast, fetchUserProfile } from "@utils/discord";
 import { classes } from "@utils/misc";

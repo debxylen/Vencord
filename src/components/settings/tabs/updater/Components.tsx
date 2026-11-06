@@ -4,18 +4,19 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { runWithDispatch } from "./runWithDispatch";
 import { Button } from "@components/Button";
 import { Card } from "@components/Card";
 import { ErrorCard } from "@components/ErrorCard";
 import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
-import { Paragraph } from "@components/Paragraph";
 import { Margins } from "@components/margins";
+import { Paragraph } from "@components/Paragraph";
 import { classes } from "@utils/misc";
 import { promptToRestart } from "@utils/promptToRestart";
 import { changes, checkForUpdates, update, updateError } from "@utils/updater";
 import { React, showToast, useState } from "@webpack/common";
+
+import { runWithDispatch } from "./runWithDispatch";
 
 
 export interface CommonProps {

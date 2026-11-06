@@ -6,10 +6,10 @@
 
 import { FormSwitch } from "@components/FormSwitch";
 import { Heading } from "@components/Heading";
-import { Paragraph } from "@components/Paragraph";
 import { Margins } from "@components/margins";
+import { Paragraph } from "@components/Paragraph";
 import { classes } from "@utils/misc";
-import { Forms, Parser, TextInput, useEffect, useState } from "@webpack/common";
+import { Parser, TextInput, useEffect, useState } from "@webpack/common";
 
 
 const RegexGuide = {

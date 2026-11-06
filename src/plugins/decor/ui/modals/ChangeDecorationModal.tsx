@@ -4,29 +4,30 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { openCreateDecorationModal } from "./CreateDecorationModal";
-import { openGuidelinesModal } from "./GuidelinesModal";
 import { Button } from "@components/Button";
 import { Flex } from "@components/Flex";
 import { Heading } from "@components/Heading";
-import { Paragraph } from "@components/Paragraph";
 import { Margins } from "@components/margins";
-import { Decoration, Preset, getPresets } from "@plugins/decor/lib/api";
+import { Paragraph } from "@components/Paragraph";
+import { Decoration, getPresets,Preset } from "@plugins/decor/lib/api";
 import { GUILD_ID, INVITE_KEY } from "@plugins/decor/lib/constants";
 import { useAuthorizationStore } from "@plugins/decor/lib/stores/AuthorizationStore";
 import { useCurrentUserDecorationsStore } from "@plugins/decor/lib/stores/CurrentUserDecorationsStore";
 import { decorationToAvatarDecoration } from "@plugins/decor/lib/utils/decoration";
 import { settings } from "@plugins/decor/settings";
-import { DecorationModalClasses, cl, requireAvatarDecorationModal } from "@plugins/decor/ui";
+import { cl, DecorationModalClasses, requireAvatarDecorationModal } from "@plugins/decor/ui";
 import { AvatarDecorationModalPreview } from "@plugins/decor/ui/components";
-import DecorDecorationGridDecoration from "@plugins/decor/ui/components/DecorDecorationGridDecoration";
 import DecorationGridCreate from "@plugins/decor/ui/components/DecorationGridCreate";
 import DecorationGridNone from "@plugins/decor/ui/components/DecorationGridNone";
+import DecorDecorationGridDecoration from "@plugins/decor/ui/components/DecorDecorationGridDecoration";
 import SectionedGridList from "@plugins/decor/ui/components/SectionedGridList";
-import { Queue } from "@utils/Queue";
 import { confirmAction, copyWithToast, openInviteModal } from "@utils/discord";
+import { Queue } from "@utils/Queue";
 import { RenderModalProps, User } from "@vencord/discord-types";
-import { FluxDispatcher, GuildStore, Modal, NavigationRouter, Parser, Tooltip, UserStore, UserSummaryItem, UserUtils, closeAllModals, openModal, useEffect, useState } from "@webpack/common";
+import { closeAllModals, FluxDispatcher, GuildStore, Modal, NavigationRouter, openModal, Parser, Tooltip, useEffect, UserStore, UserSummaryItem, UserUtils, useState } from "@webpack/common";
+
+import { openCreateDecorationModal } from "./CreateDecorationModal";
+import { openGuidelinesModal } from "./GuidelinesModal";
 
 
 function usePresets() {

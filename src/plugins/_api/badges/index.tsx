@@ -17,22 +17,23 @@
 */
 
 import "./fixDiscordBadgePadding.css";
-import { BadgePosition, BadgeRarity, BadgeUserArgs, DirectoryBadge, ProfileBadge, _getBadges } from "@api/Badges";
+
+import { _getBadges,BadgePosition, BadgeRarity, BadgeUserArgs, DirectoryBadge, ProfileBadge } from "@api/Badges";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Heart } from "@components/Heart";
 import { CopyIcon, LinkIcon } from "@components/Icons";
-import { Paragraph } from "@components/Paragraph";
-import { Text } from "@components/Text";
 import { Margins } from "@components/margins";
+import { Paragraph } from "@components/Paragraph";
 import DonateButton from "@components/settings/DonateButton";
 import { openContributorModal } from "@components/settings/tabs";
-import { Logger } from "@utils/Logger";
+import { Text } from "@components/Text";
 import { Devs } from "@utils/constants";
 import { copyWithToast } from "@utils/discord";
+import { Logger } from "@utils/Logger";
 import { shouldShowContributorBadge } from "@utils/misc";
 import definePlugin from "@utils/types";
-import { ContextMenuApi, Menu, Modal, UserStore, openModal, showToast } from "@webpack/common";
+import { ContextMenuApi, Menu, Modal, openModal, showToast,UserStore } from "@webpack/common";
 
 
 const ContributorBadge: ProfileBadge = {
